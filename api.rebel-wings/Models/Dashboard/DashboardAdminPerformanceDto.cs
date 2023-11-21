@@ -14,7 +14,9 @@ public class DashboardAdminPerformanceDto
     public decimal AverageEvaluation { get; set; }
     public virtual ICollection<DashboardAdminPerformanceByBranchDto> Performances { get; set; }
     public virtual ICollection<TaskNoCompleteDto> TopOmittedTask { get; set; }
+    public virtual ICollection<TaskNoCompleteDto> TopOmittedTask2 { get; set; }
     public virtual ICollection<BranchChartBarVerticalDto> Multi { get; set; }
+    public virtual ICollection<BranchChartBarVerticalDto> Multi2 { get; set; }
 }
 
 public class DashboardAdminPerformanceByBranchDto

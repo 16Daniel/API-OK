@@ -5,6 +5,7 @@ using biz.rebel_wings.Entities;
 using biz.rebel_wings.Repository.BanosMatutino;
 using biz.rebel_wings.Services.Logger;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.rebel_wings.Controllers
 {
@@ -249,6 +250,69 @@ namespace api.rebel_wings.Controllers
         return StatusCode(500, response);
       }
       return StatusCode(200, response);
+    }
+
+        /// <summary>
+        /// GET:
+        /// Regresa Apertura
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="user"></param>
+        /// <param name="tipo"></param>
+        /// <param name="turno"></param>
+        /// <returns></returns>
+        [HttpGet("{id}/{user}/{tipo}/{turno}")]
+    [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<Models.ApiResponse.ApiResponse<BanosMatutinoDto>>> Get(int id, int user, int tipo,int turno)
+    {
+        var response = new Models.ApiResponse.ApiResponse<BanosMatutinoDto>();
+        try
+        {
+                DateTime today = DateTime.Now;
+                var inicio = today.AbsoluteStart();
+                var startDay = inicio.AddHours(7);
+                var middleDay = inicio.AddHours(17);     //----> correcta
+                var diant = middleDay.AddDays(-1);
+                var endDay = inicio.AddHours(27);
+
+                if (turno == 1)
+                {
+                   
+
+                    var order = _banosMatutinoRepository.GetAllIncluding(i => i.PhotoBanosMatutinos);
+                    var @default = await order.FirstOrDefaultAsync(f => f.Branch == id && f.CreatedDate >= startDay && f.CreatedDate <= middleDay && f.CreatedBy == user && f.Tipo == tipo);
+                    response.Result = _mapper.Map<BanosMatutinoDto>(@default);
+                    response.Message = "Consult was success";
+                    response.Success = true;
+                }
+                else {
+
+                    if (today.Hour < 3) {
+                        var order = _banosMatutinoRepository.GetAllIncluding(i => i.PhotoBanosMatutinos);
+                        var @default = await order.FirstOrDefaultAsync(f => f.Branch == id && f.CreatedDate >= inicio && f.CreatedDate <= startDay && f.CreatedBy == user && f.Tipo == tipo);
+                        response.Result = _mapper.Map<BanosMatutinoDto>(@default);
+                        response.Message = "Consult was success";
+                        response.Success = true;
+                    }
+                    else {
+                        var order = _banosMatutinoRepository.GetAllIncluding(i => i.PhotoBanosMatutinos);
+                        var @default = await order.FirstOrDefaultAsync(f => f.Branch == id && f.CreatedDate >= middleDay && f.CreatedDate <= endDay && f.CreatedBy == user && f.Tipo == tipo);
+                        response.Result = _mapper.Map<BanosMatutinoDto>(@default);
+                        response.Message = "Consult was success";
+                        response.Success = true;
+                    }
+                }
+            }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            response.Success = false;
+            response.Message = ex.ToString();
+            return StatusCode(500, response);
+        }
+        return StatusCode(200, response);
     }
 
   }

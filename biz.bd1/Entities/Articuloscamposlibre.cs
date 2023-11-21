@@ -22,6 +22,9 @@ namespace biz.bd1.Entities
         public string Inventariable { get; set; }
         public string Regulariza { get; set; }
         public string UnidadMedida { get; set; }
+        public string Cerveza { get; set; }
+        public string Filtro { get; set; }
+        public string RegularizaSemanal { get; set; }
 
         public virtual Articulo1 CodarticuloNavigation { get; set; }
     }

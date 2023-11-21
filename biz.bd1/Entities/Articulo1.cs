@@ -38,7 +38,7 @@ namespace biz.bd1.Entities
         public string Descripadic { get; set; }
         public int? Tipoimpuesto { get; set; }
         public short? Dpto { get; set; }
-        public short? Seccion { get; set; }
+        public int Seccion { get; set; }
         public short? Familia { get; set; }
         public short? Subfamilia { get; set; }
         public short? Linea { get; set; }

@@ -13,8 +13,10 @@ public class DashboardAdminPerformance
     public decimal NoComplete { get; set; }
     public decimal AverageEvaluation { get; set; }
     public virtual ICollection<TaskNoComplete> TopOmittedTask { get; set; }
+    public virtual ICollection<TaskNoComplete> TopOmittedTask2 { get; set; }
     public virtual ICollection<DashboardAdminPerformanceByBranch> Performances { get; set; }
     public virtual ICollection<BranchChartBarVertical> Multi { get; set; }
+    public virtual ICollection<BranchChartBarVertical> Multi2 { get; set; }
 }
 
 public class DashboardAdminPerformanceByBranch

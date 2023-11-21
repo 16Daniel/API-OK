@@ -8,5 +8,6 @@ namespace api.rebel_wings.Models.Stock
         public string Regulariza { get; set; }
         public string Unidadessat { get; set; }
         public string Unidadmedida { get; set; }
-  }
+        public string RegularizaSemanal { get; set; }
+    }
 }

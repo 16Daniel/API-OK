@@ -146,6 +146,45 @@ namespace api.rebel_wings.Controllers
         }
 
         /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetStockV", Name = "GetStockV")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockV(int id_sucursal, string dataBase)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockV(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockV(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
         /// GET para validar stock de pollo con la base ICG
         /// </summary>
         /// <param name="id_sucursal">ID del sucursal que se obtiene de login</param>
@@ -223,6 +262,86 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+
+        /// <summary>
+        /// GET para validar stock de pollo con la base ICG
+        /// </summary>
+        /// <param name="id_sucursal">ID del sucursal que se obtiene de login</param>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <param name="cantidad">cantidad de stock de pollo a ingresar al sistema</param>
+        /// <returns></returns>
+        [HttpGet("ValidateStockV", Name = "ValidateStockV")]
+        public ActionResult<ApiResponse<List<StockDto>>> ValidateStockV(int id_sucursal, string dataBase, decimal cantidad, int codarticulo)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            decimal _cantidad = 0;
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        if (_stockDB1Repository.StockValidateV(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB1Repository.StockValidateV(id_sucursal, codarticulo) + cantidad;
+
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB1Repository.StockValidateV(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = "" + _cantidad;
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = "" + _cantidad;
+                        }
+                        break;
+                    case "DB2":
+                        if (_stockDB2Repository.StockValidateV(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateV(id_sucursal, codarticulo) + cantidad;
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateV(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = _cantidad.ToString();
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = _cantidad.ToString();
+                        }
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+
         /// <summary>
         /// POST Para actualizar Stock y hacer regularizacion en ICG
         /// </summary>
@@ -261,6 +380,46 @@ namespace api.rebel_wings.Controllers
 
             return Ok(response);
         }
+
+        /// <summary>
+        /// POST Para actualizar Stock y hacer regularizacion en ICG
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpPost("AddRegularizateV", Name = "AddRegularizateV")]
+        public ActionResult<ApiResponse<StockDto>> AddRegularizateV(int codArticulo, string codAlmacen, double cantidad, string dataBase)
+        {
+            var response = new ApiResponse<StockDto>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        response.Result = _mapper.Map<StockDto>(_stockDB1Repository.UpdateStockV(codArticulo, codAlmacen, cantidad));
+                        response.Message = "success";
+                        break;
+                    case "DB2":
+                        response.Result = _mapper.Map<StockDto>(_stockDB2Repository.UpdateStockV(codArticulo, codAlmacen, cantidad));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
 
         [HttpGet("{id}/Sales-Expectation")]
         [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]

@@ -246,15 +246,35 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
             i = i + 1;
         }
 
-        ///BAÑOS MATUTINOS
+        ///BAÑOS MATUTINOS HOMBRE
         
-        count = _context.BanosMatutinos.Where(x => x.CreatedDate >= date && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city).Count();
+        count = _context.BanosMatutinos.Where(x => x.CreatedDate >= date && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 1).Count();
         i = 0;
         while (i < count)
         {
-            list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= date && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city));
+            list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= date && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 1));
             i = i + 1;
         }
+
+        ///BAÑOS MATUTINOS MUJERES
+
+        count = _context.BanosMatutinos.Where(x => x.CreatedDate >= date && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 2).Count();
+        i = 0;
+        while (i < count)
+        {
+            list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= date && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 2));
+            i = i + 1;
+        }
+
+        ///ACEITE
+        count = _context.Alarms.Where(x => x.CreatedDate >= date.ToUniversalTime() && x.CreatedDate <= dateMiddle.ToUniversalTime() && x.BranchId == id && x.CreatedByNavigation.StateId == city).Count();
+        i = 0;
+        while (i < count)
+        {
+            list.Add(_context.Alarms.Any(x => x.CreatedDate >= date.ToUniversalTime() && x.CreatedDate <= dateMiddle.ToUniversalTime() && x.BranchId == id && x.CreatedByNavigation.StateId == city));
+            i = i + 1;
+        }
+
 
 
         //list.Add(_context.StockChickens.Any(x=> x.CreatedDate >= date && x.CreatedDate <= dateEnd && x.Branch == id));
@@ -263,7 +283,7 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
 
         //VESPERTINO
         ////ASISTENCIAS///list.Add(_context.ValidateAttendances.Any(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.BranchId == id && x.CreatedByNavigation.StateId == city));
-        
+
         ///PROPINA
         count = _context.Tips.Where(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.BranchId == id && x.CreatedByNavigation.StateId == city).Count();
         i = 0;
@@ -317,6 +337,27 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
             list.Add(_context.LivingRoomBathroomCleanings.Any(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.BranchId == id && x.CreatedByNavigation.StateId == city));
             i = i + 1;
         }
+
+        ///BAÑOS MATUTINOS HOMBRE
+
+        count = _context.BanosMatutinos.Where(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 1).Count();
+        i = 0;
+        while (i < count)
+        {
+            list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 1));
+            i = i + 1;
+        }
+
+        ///BAÑOS MATUTINOS MUJERES
+
+        count = _context.BanosMatutinos.Where(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 2).Count();
+        i = 0;
+        while (i < count)
+        {
+            list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 2));
+            i = i + 1;
+        }
+
 
 
         //list.Add(_context.Alarms.Any(x=> x.CreatedDate >= date && x.CreatedDate <= dateEnd && x.BranchId == id));
@@ -478,11 +519,12 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
                 PercentageComplete = 0
             } });
         
-        var bathRoomsPerShiftMorning = _context.BanosMatutinos.Where(x =>
+        var bathRoomsPerShiftMorningMen = _context.BanosMatutinos.Where(x =>
             x.CreatedDate >= date 
             && x.CreatedDate <= dateMiddle
             && x.Branch == id
-            && x.CreatedByNavigation.StateId == city)
+            && x.CreatedByNavigation.StateId == city 
+            && x.Tipo == 1)
             .Select(s => new TaskPerShifts()
             {
                 Date = s.CreatedDate,
@@ -491,11 +533,11 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
                 Supervisor =
                     $"{s.CreatedByNavigation.Name} {s.CreatedByNavigation.LastName} {s.CreatedByNavigation.MotherName}",
                 Capture = _context.Users.Where(f=>f.Id == s.UpdatedBy).Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
-                NameTask = "BAÑOS",
+                NameTask = "BAÑOS HOMBRES",
                 PercentageComplete = 100
             }).ToList();
-        taskPerShiftsMorningList.AddRange(bathRoomsPerShiftMorning.Any()
-            ? bathRoomsPerShiftMorning
+        taskPerShiftsMorningList.AddRange(bathRoomsPerShiftMorningMen.Any()
+            ? bathRoomsPerShiftMorningMen
             : new TaskPerShifts[] { new TaskPerShifts()
             {
                 Date = dateMiddle,
@@ -503,9 +545,74 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
                 Status = false,
                 Supervisor = _context.Users.Where(f=> f.RoleId == 1 && f.StateId == city && f.SucursalId == id)
                     .Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
-                NameTask = "BAÑOS",
+                NameTask = "BAÑOS HOMBRES",
                 PercentageComplete = 0
             } });
+
+                var bathRoomsPerShiftMorningWomen = _context.BanosMatutinos.Where(x =>
+            x.CreatedDate >= date 
+            && x.CreatedDate <= dateMiddle
+            && x.Branch == id
+            && x.CreatedByNavigation.StateId == city
+            && x.Tipo == 2)
+            .Select(s => new TaskPerShifts()
+            {
+                Date = s.CreatedDate,
+                Detail = s.Id,
+                Status = true,
+                Supervisor =
+                    $"{s.CreatedByNavigation.Name} {s.CreatedByNavigation.LastName} {s.CreatedByNavigation.MotherName}",
+                Capture = _context.Users.Where(f=>f.Id == s.UpdatedBy).Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "BAÑOS MUJERES",
+                PercentageComplete = 100
+            }).ToList();
+        taskPerShiftsMorningList.AddRange(bathRoomsPerShiftMorningWomen.Any()
+            ? bathRoomsPerShiftMorningWomen
+            : new TaskPerShifts[] { new TaskPerShifts()
+            {
+                Date = dateMiddle,
+                Detail = 0,
+                Status = false,
+                Supervisor = _context.Users.Where(f=> f.RoleId == 1 && f.StateId == city && f.SucursalId == id)
+                    .Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "BAÑOS MUJERES",
+                PercentageComplete = 0
+            } });
+
+        ///////////////////////////////////////////
+        
+                var alarmsList = _context.Alarms.Where(x =>
+            x.CreatedDate >= date.ToUniversalTime()
+            && x.CreatedDate <= dateMiddle.ToUniversalTime()
+            && x.BranchId == id
+            && x.CreatedByNavigation.StateId == city).Select(s => new TaskPerShifts()
+            {
+                Date = s.CreatedDate,
+                Detail = s.Id,
+                Status = true,
+                Supervisor =
+                $"{s.CreatedByNavigation.Name} {s.CreatedByNavigation.LastName} {s.CreatedByNavigation.MotherName}",
+                Capture = _context.Users.Where(f => f.Id == s.UpdatedBy).Select(_s => $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "ACEITE",
+                PercentageComplete = 100
+            }).ToList();
+        taskPerShiftsMorningList.AddRange(alarmsList.Any()
+            ? alarmsList
+            : new TaskPerShifts[]
+            {
+                 new TaskPerShifts()
+                 {
+                     Date = dateMiddle,
+                     Detail = 0,
+                     Status = false,
+                     Supervisor = _context.Users.Where(f=> f.RoleId == 1 && f.StateId == city && f.SucursalId == id)
+                    .Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                     NameTask = "ACEITE",
+                     PercentageComplete = 0
+                 }
+            });
+
+        ///////////////////////////////////////////
         
         //var cashPerShiftsList = _context.CashRegisterShortages.Where(x =>
         //    x.CreatedDate >= date
@@ -699,6 +806,70 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
                 }
             });
 
+        //////////////////////////////////////////////////////
+
+        var bathRoomsPerShiftEveningMen = _context.BanosMatutinos.Where(x =>
+            x.CreatedDate >= dateMiddle
+            && x.CreatedDate <= dateEnd
+            && x.Branch == id
+            && x.CreatedByNavigation.StateId == city 
+            && x.Tipo == 1)
+            .Select(s => new TaskPerShifts()
+            {
+                Date = s.CreatedDate,
+                Detail = s.Id,
+                Status = true,
+                Supervisor =
+                    $"{s.CreatedByNavigation.Name} {s.CreatedByNavigation.LastName} {s.CreatedByNavigation.MotherName}",
+                Capture = _context.Users.Where(f=>f.Id == s.UpdatedBy).Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "BAÑOS HOMBRES",
+                PercentageComplete = 100
+            }).ToList();
+        taskPerShiftsEveningList.AddRange(bathRoomsPerShiftEveningMen.Any()
+            ? bathRoomsPerShiftEveningMen
+            : new TaskPerShifts[] { new TaskPerShifts()
+            {
+                Date = dateMiddle,
+                Detail = 0,
+                Status = false,
+                Supervisor = _context.Users.Where(f=> f.RoleId == 1 && f.StateId == city && f.SucursalId == id)
+                    .Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "BAÑOS HOMBRES",
+                PercentageComplete = 0
+            } });
+
+                var bathRoomsPerShiftEveningWomen = _context.BanosMatutinos.Where(x =>
+            x.CreatedDate >= dateMiddle
+            && x.CreatedDate <= dateEnd
+            && x.Branch == id
+            && x.CreatedByNavigation.StateId == city
+            && x.Tipo == 2)
+            .Select(s => new TaskPerShifts()
+            {
+                Date = s.CreatedDate,
+                Detail = s.Id,
+                Status = true,
+                Supervisor =
+                    $"{s.CreatedByNavigation.Name} {s.CreatedByNavigation.LastName} {s.CreatedByNavigation.MotherName}",
+                Capture = _context.Users.Where(f=>f.Id == s.UpdatedBy).Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "BAÑOS MUJERES",
+                PercentageComplete = 100
+            }).ToList();
+        taskPerShiftsEveningList.AddRange(bathRoomsPerShiftEveningWomen.Any()
+            ? bathRoomsPerShiftEveningWomen
+            : new TaskPerShifts[] { new TaskPerShifts()
+            {
+                Date = dateMiddle,
+                Detail = 0,
+                Status = false,
+                Supervisor = _context.Users.Where(f=> f.RoleId == 1 && f.StateId == city && f.SucursalId == id)
+                    .Select(_s=> $"{_s.Name} {_s.LastName} {_s.MotherName}").First(),
+                NameTask = "BAÑOS MUJERES",
+                PercentageComplete = 0
+            } });
+
+        /////////////////////////////////////////////////////
+        
         var tabletSafeKeepingsList = _context.TabletSafeKeepings.Where(x =>
             x.CreatedDate >= dateMiddle 
             && x.CreatedDate <= dateEnd 
@@ -731,31 +902,6 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
                 } 
             });
 
-        // var alarmsList = _context.Alarms.Where(x =>
-        //     x.CreatedDate >= dateMiddle && x.CreatedDate <= dateEnd && x.BranchId == id).Select(s => new TaskPerShifts()
-        // {
-        //     Date = s.CreatedDate,
-        //     Detail = s.Id,
-        //     Status = true,
-        //     Supervisor =
-        //         $"{s.CreatedByNavigation.Name} {s.CreatedByNavigation.LastName} {s.CreatedByNavigation.MotherName}",
-        //     NameTask = "Alarmas",
-        //     PercentageComplete = 100
-        // }).ToList();
-        // taskPerShiftsEveningList.AddRange(alarmsList.Any()
-        //     ? alarmsList
-        //     : new TaskPerShifts[]
-        //     {
-        //         new TaskPerShifts()
-        //         {
-        //             Date = dateMiddle,
-        //             Detail = 0,
-        //             Status = false,
-        //             Supervisor = "",
-        //             NameTask = "Alarmas",
-        //             PercentageComplete = 0
-        //         }
-        //     });
 
         var inventariosDiarios = _context.Inventarios.Where(x =>
             x.CreatedDate >= dateMiddle 
@@ -963,7 +1109,8 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
         list.Add(_context.ValidationGas.Any(x=> x.CreatedDate >= dateStart && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city));
         list.Add(_context.ToSetTables.Any(x => x.CreatedDate >= dateStart && x.CreatedDate <= dateMiddle && x.Branch == id));
         //list.Add(_context.CashRegisterShortages.Any(x => x.CreatedDate >= dateStart && x.CreatedDate <= dateEnd && x.BranchId == id && x.CreatedByNavigation.StateId == city));
-        list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= dateStart && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city));
+        list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= dateStart && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 1));
+        list.Add(_context.BanosMatutinos.Any(x => x.CreatedDate >= dateStart && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city && x.Tipo == 2));
         list.Add(_context.WaitlistTables.Any(x => x.CreatedDate >= dateStart && x.CreatedDate <= dateMiddle && x.Branch == id && x.CreatedByNavigation.StateId == city));
 
         //list.Add(_context.StockChickens.Any(x=> x.CreatedDate >= dateStart && x.CreatedDate <= dateEnd && x.Branch == id && x.CreatedByNavigation.StateId == city));
@@ -2384,13 +2531,16 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
             tasksAll.Clear();
 
         }
-
+        if (byBranches.Count == 0){
+            return dashboard;
+        }
         dashboard.Performances = byBranches;
-        var percentageByBranch = 1 * 100 / totalBranch;
+
+        var percentageByBranch = totalBranch == 0 ? 1 : 1 * 100 / totalBranch;
         foreach (var performance in dashboard.Performances)
         {
-            dashboard.Complete += Decimal.Divide(performance.Complete * percentageByBranch, 100);
-            dashboard.NoComplete += Decimal.Divide(performance.NoComplete * percentageByBranch, 100);
+            dashboard.Complete += percentageByBranch == 0 ? 0: Decimal.Divide(performance.Complete * percentageByBranch, 100);
+            dashboard.NoComplete += percentageByBranch == 0 ? 0 : Decimal.Divide(performance.NoComplete * percentageByBranch, 100);
         }
 
         #region Top 5 Omitted activities
@@ -2507,11 +2657,11 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
         }
 
         dashboard.Performances = byBranches;
-        var percentageByBranch = 1 * 100 / branches.Count();
+        decimal percentageByBranch = branches.Count();
         foreach (var performance in dashboard.Performances)
         {
-            dashboard.Complete += Decimal.Divide(performance.Complete * percentageByBranch, 100);
-            dashboard.NoComplete += Decimal.Divide(performance.NoComplete * percentageByBranch, 100);
+            dashboard.Complete += Decimal.Divide(performance.Complete , percentageByBranch);
+            dashboard.NoComplete += Decimal.Divide(performance.NoComplete, percentageByBranch);
         }
         
         #region Top 5 Omitted activities

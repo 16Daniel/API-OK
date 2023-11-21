@@ -10,6 +10,7 @@ namespace biz.rebel_wings.Entities
         public int Id { get; set; }
         public int? BanosMatutinoId { get; set; }
         public string? Photo { get; set; }
+        public int Type { get; set; }
         public int CreatedBy { get; set; }
         public DateTime CreatedDate { get; set; }
         public int? UpdatedBy { get; set; }

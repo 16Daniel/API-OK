@@ -5590,6 +5590,20 @@ namespace dal.bd1.DBContext
 
                 entity.Property(e => e.ValorAyc).HasColumnName("VALOR_AYC");
 
+                entity.Property(e => e.Cerveza)
+                .HasColumnName("CERVEZA")
+                .HasMaxLength(1)
+                .IsFixedLength();
+
+                entity.Property(e => e.RegularizaSemanal)
+                .HasColumnName("REGULARIZA_SEMANAL")
+                .HasMaxLength(1)
+                .IsFixedLength();
+
+                entity.Property(e => e.Filtro)
+                   .HasColumnName("FILTRO")
+                   .HasMaxLength(50);
+
                 entity.HasOne(d => d.CodarticuloNavigation)
                     .WithOne(p => p.Articuloscamposlibre)
                     .HasForeignKey<Articuloscamposlibre>(d => d.Codarticulo)

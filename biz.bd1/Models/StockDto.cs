@@ -16,5 +16,6 @@ namespace biz.bd1.Models
         public string Unidadmedida { get; set; }
         public double? Stock1 { get; set; }
         public DateTime? Ultfecha { get; set; }
+        public string RegularizaSemanal { get; set; }
     }
 }

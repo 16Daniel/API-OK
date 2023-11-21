@@ -74,6 +74,7 @@ namespace api.rebel_wings.Controllers
         private readonly IRequestTransferRepository _requestTransferRepository;
         private readonly IAlbaranesRepository _albaranesRepository;
         private readonly IPhotoToSetTableRepository _photoToSetTableRepository;
+        private readonly IPhotoBanosMatutinoRepository _photoBanosMatutinoRepository;
 
 
         #region Regional
@@ -118,63 +119,64 @@ namespace api.rebel_wings.Controllers
         private readonly IPhotoBathroomRepository _photoBathroomRepository;
         private readonly IPhotoBarRepository _photoBarRepository;
 
-    #endregion
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="mapper"></param>
-    /// <param name="logger"></param>
-    /// <param name="validateAttendanceRepository"></param>
-    /// <param name="salesExpectationRepository"></param>
-    /// <param name="toSetTableRepository"></param>
-    /// <param name="banosMatutinoRepository"></param>
-    /// <param name="validationGasRepository"></param>
-    /// <param name="waitlistTableRepository"></param>
-    /// <param name="tipRepository"></param>
-    /// <param name="tabletSafeKeepingRepository"></param>
-    /// <param name="livingRoomBathroomCleaningRepository"></param>
-    /// <param name="alarmRepository"></param>
-    /// <param name="cashRegisterShortageRepository"></param>
-    /// <param name="riskProductRepository"></param>
-    /// <param name="orderRepository"></param>
-    /// <param name="fridgeRepository"></param>
-    /// <param name="precookedChickenRepository"></param>
-    /// <param name="completeProductsInOrderRepository"></param>
-    /// <param name="fryerCleaningRepository"></param>
-    /// <param name="peopleCountingRepository"></param>
-    /// <param name="satisfactionSurveyRepository"></param>
-    /// <param name="generalCleaningRepository"></param>
-    /// <param name="stationRepository"></param>
-    /// <param name="spotlightRepository"></param>
-    /// <param name="drinksTemperatureRepository"></param>
-    /// <param name="audioVideoRepository"></param>
-    /// <param name="barCleaningRepository"></param>
-    /// <param name="fridgeSalonRepository"></param>
-    /// <param name="bathRoomsOverallStatusRepository"></param>
-    /// <param name="washBasinWithSoapPaperRepository"></param>
-    /// <param name="ticketTableRepository"></param>
-    /// <param name="entriesChargedAsDeliveryNoteRepository"></param>
-    /// <param name="orderScheduleReviewRepository"></param>
-    /// <param name="checkTableRepository"></param>
-    /// <param name="kitchenRepository"></param>
-    /// <param name="salonRepository"></param>
-    /// <param name="bathroomRepository"></param>
-    /// <param name="barRepository"></param>
-    /// <param name="requestTransferRepository"></param>
-    /// <param name="albaranesRepository"></param>
-    /// <param name="stockChickenByBranchRepository"></param>
-    /// <param name="photoGeneralCleaningRepository"></param>
-    /// <param name="photoDrinksTemperatureRepository"></param>
-    /// <param name="photoSpotlightRepository"></param>
-    /// <param name="photoWashBasinWithSoapPaperRepository"></param>
-    /// <param name="photoTicketTableRepository"></param>
-    /// <param name="photoKitchenRepository"></param>
-    /// <param name="photoSalonRepository"></param>
-    /// <param name="photoBathroomRepository"></param>
-    /// <param name="photoBarRepository"></param>
-    /// <param name="photoToSetTableRepository"></param>
+        #endregion
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="mapper"></param>
+        /// <param name="logger"></param>
+        /// <param name="validateAttendanceRepository"></param>
+        /// <param name="salesExpectationRepository"></param>
+        /// <param name="toSetTableRepository"></param>
+        /// <param name="banosMatutinoRepository"></param>
+        /// <param name="validationGasRepository"></param>
+        /// <param name="waitlistTableRepository"></param>
+        /// <param name="tipRepository"></param>
+        /// <param name="tabletSafeKeepingRepository"></param>
+        /// <param name="livingRoomBathroomCleaningRepository"></param>
+        /// <param name="alarmRepository"></param>
+        /// <param name="cashRegisterShortageRepository"></param>
+        /// <param name="riskProductRepository"></param>
+        /// <param name="orderRepository"></param>
+        /// <param name="fridgeRepository"></param>
+        /// <param name="precookedChickenRepository"></param>
+        /// <param name="completeProductsInOrderRepository"></param>
+        /// <param name="fryerCleaningRepository"></param>
+        /// <param name="peopleCountingRepository"></param>
+        /// <param name="satisfactionSurveyRepository"></param>
+        /// <param name="generalCleaningRepository"></param>
+        /// <param name="stationRepository"></param>
+        /// <param name="spotlightRepository"></param>
+        /// <param name="drinksTemperatureRepository"></param>
+        /// <param name="audioVideoRepository"></param>
+        /// <param name="barCleaningRepository"></param>
+        /// <param name="fridgeSalonRepository"></param>
+        /// <param name="bathRoomsOverallStatusRepository"></param>
+        /// <param name="washBasinWithSoapPaperRepository"></param>
+        /// <param name="ticketTableRepository"></param>
+        /// <param name="entriesChargedAsDeliveryNoteRepository"></param>
+        /// <param name="orderScheduleReviewRepository"></param>
+        /// <param name="checkTableRepository"></param>
+        /// <param name="kitchenRepository"></param>
+        /// <param name="salonRepository"></param>
+        /// <param name="bathroomRepository"></param>
+        /// <param name="barRepository"></param>
+        /// <param name="requestTransferRepository"></param>
+        /// <param name="albaranesRepository"></param>
+        /// <param name="stockChickenByBranchRepository"></param>
+        /// <param name="photoGeneralCleaningRepository"></param>
+        /// <param name="photoDrinksTemperatureRepository"></param>
+        /// <param name="photoSpotlightRepository"></param>
+        /// <param name="photoWashBasinWithSoapPaperRepository"></param>
+        /// <param name="photoTicketTableRepository"></param>
+        /// <param name="photoKitchenRepository"></param>
+        /// <param name="photoSalonRepository"></param>
+        /// <param name="photoBathroomRepository"></param>
+        /// <param name="photoBarRepository"></param>
+        /// <param name="photoToSetTableRepository"></param>
+        /// <param name="photoBanosMatutinoRepository"></param>
 
-    public ControlCenterController(IMapper mapper, ILoggerManager logger, IValidateAttendanceRepository validateAttendanceRepository,
+        public ControlCenterController(IMapper mapper, ILoggerManager logger, IValidateAttendanceRepository validateAttendanceRepository,
             IStockChickenRepository salesExpectationRepository, IToSetTableRepository toSetTableRepository, IBanosMatutinoRepository banosMatutinoRepository,
             IValidationGasRepository validationGasRepository, IWaitlistTableRepository waitlistTableRepository,
             ITipRepository tipRepository,
@@ -218,6 +220,7 @@ namespace api.rebel_wings.Controllers
             IPhotoKitchenRepository photoKitchenRepository,
             IPhotoSalonRepository photoSalonRepository,
             IPhotoBathroomRepository photoBathroomRepository,
+            IPhotoBanosMatutinoRepository photoBanosMatutinoRepository,
             IPhotoBarRepository photoBarRepository, IPhotoToSetTableRepository photoToSetTableRepository)
     {
 
@@ -272,6 +275,7 @@ namespace api.rebel_wings.Controllers
       _photoBathroomRepository = photoBathroomRepository;
       _photoBarRepository = photoBarRepository;
       _photoToSetTableRepository = photoToSetTableRepository;
+      _photoBanosMatutinoRepository = photoBanosMatutinoRepository;
     }
 
     /// <summary>
@@ -344,15 +348,15 @@ namespace api.rebel_wings.Controllers
                         if (sm == null) { avancesm = 0; }
                         else { if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 1 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
                                if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 2 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
-                               if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 3 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
-                               if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 4 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
-                               if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 5 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
+                               //if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 3 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
+                               //if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 4 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
+                               //if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 5 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
                                if (_photoToSetTableRepository.GetAll().FirstOrDefault(a => a.ToSetTableId == sm.Id && a.Type == 6 && a.CreatedBy == idUser) != null) { avancesm = avancesm + 1; }
                            
                                
                         }
                         bool completosm;
-                        if (avancesm == 6) { completosm = true; } else { completosm = false; }
+                        if (avancesm == 3) { completosm = true; } else { completosm = false; }
                     data1.ControlCenters.Add(new ControlCenter()
                     {
                         Name = "SALÓN MONTADO",
@@ -370,6 +374,33 @@ namespace api.rebel_wings.Controllers
                         Color = completosm ? "success" : "warning"
                         //Id = _toSetTableRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
                     });
+
+                    //    var avance3 = 0;
+                    //    //var encuesta = _satisfactionSurveyRepository.Count(e => e.BranchId == branch && e.CreatedDate > today);
+                    //    //var encuesta = _satisfactionSurveyRepository.;
+                    //    var esp1 = _waitlistTableRepository.GetAll().Where(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser);
+                    //    if (esp1.Count() == 0) { avance3 = 0; }
+                    //    else{ avance3 = esp1.Count(); }
+                    //    bool completoesp1;
+                    //    if (avance3 == 2) { completoesp1 = true; } else { completoesp1 = false; }
+
+                    //        var hoy = DateTime.Now;
+                    //        bool capturo = false; 
+                    //        if (hoy.Hour > 13 && hoy.Hour <= 15 ) { capturo = _waitlistTableRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate > startDay.AbsoluteStart().AddHours(13) && e.CreatedDate <= middleDay.AbsoluteStart().AddHours(15) && e.CreatedBy == idUser); }
+                    //        if (hoy.Hour > 15 && hoy.Hour <= 17) { capturo = _waitlistTableRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate > startDay.AbsoluteStart().AddHours(15) && e.CreatedDate <= middleDay.AbsoluteStart().AddHours(17) && e.CreatedBy == idUser); }
+
+                    //data1.ControlCenters.Add(new ControlCenter()
+                    //{
+                    //    Name = "MESAS EN ESPERA",
+                    //    Description = "",
+                    //    IsPercentageOrComplete = capturo,
+                    //    IsComplete = completoesp1,
+                    //    Percentage = esp1.Count(),
+                    //    Color = completoesp1 ? "success" : "warning",
+                        
+                    //});
+
+
                     data1.ControlCenters.Add(new ControlCenter()
                     {
                         Name = "MESAS EN ESPERA",
@@ -381,6 +412,7 @@ namespace api.rebel_wings.Controllers
                         ? "success" : "warning",
                         Id = _waitlistTableRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
                     });
+
                     
                     var salesExpectation = _stockChickenByBranchRepository.GetAll().FirstOrDefault(f =>
                         f.BranchId == branch && f.CreatedDate >= startDay && f.CreatedDate <= endDay);
@@ -396,10 +428,10 @@ namespace api.rebel_wings.Controllers
                     {
                         Name = "Stock de Pollo",
                         Description = "",
-                        IsPercentageOrComplete = true,
+                        IsPercentageOrComplete = false,
                         IsComplete = false,
-                        Percentage = sales.CompletePercentage.HasValue ? sales.CompletePercentage.Value : new decimal(),
-                        Color = _salesExpectationRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay)
+                        Percentage = 0,
+                        Color = _salesExpectationRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay  && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
                         ? "success" : "warning"
                     });
                     data1.ControlCenters.Add(new ControlCenter()
@@ -418,18 +450,97 @@ namespace api.rebel_wings.Controllers
                         Id = _cashRegisterShortageRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
                         
                     });
+                    string coment = " ";
+                    var avancesb = 0;
+                        var sb = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser && e.Tipo == 1);
+                        if (sb == null) { avancesb = 0; }
+                        else { if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 1 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 2 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 3 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 4 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               //if (_banosMatutinoRepository.GetAll().FirstOrDefault(a => a.Id == sb.Id && a.Comment.ToString() != coment.ToString() && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+
+                            }
+                        bool completosb;
+                        if (avancesb == 4) { completosb = true; } else { completosb = false; }
                     data1.ControlCenters.Add(new ControlCenter()
                     {
-                        Name = "BAÑOS MATUTINO",
+                        Name = "BAÑOS MATUTINO HOMBRES",
+                        //Description = "",
+                        //IsPercentageOrComplete = false,
+                        //IsComplete = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser),
+                        //Percentage = 0,
+                        //Color = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
+                        //? "success" : "warning",
+
                         Description = "",
                         IsPercentageOrComplete = false,
-                        IsComplete = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser),
-                        Percentage = 0,
-                        Color = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
-                        ? "success" : "warning",
-                        Id = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
+                        IsComplete = completosb,
+                        Percentage = decimal.Parse(avancesb.ToString()),
+                        Color = completosb ? "success" : "warning"
+
+                        //Id = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
                     });
-                    data1.Progress = _fridgeRepository.ProgressTask(data1.ControlCenters.Count(x=>x.IsComplete.Equals(true)), 6);
+
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "PRODUCTO EN RIESGO",
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser),
+                        Percentage = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser) ? decimal.Parse(_riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Code) : 0,
+                        Color = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
+                            ? "success" : "warning",
+                        Id = _riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
+                    });
+
+                    string comentM = " ";
+                    var avancesbM = 0;
+                        var sbM = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser && e.Tipo == 2);
+                        if (sbM == null) { avancesbM = 0; }
+                        else { if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 1 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 2 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 3 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 4 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               //if (_banosMatutinoRepository.GetAll().FirstOrDefault(a => a.Id == sb.Id && a.Comment.ToString() != coment.ToString() && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+
+                            }
+                        bool completosbM;
+                        if (avancesbM == 4) { completosbM = true; } else { completosbM = false; }
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "BAÑOS MATUTINO MUJERES",
+                        //Description = "",
+                        //IsPercentageOrComplete = false,
+                        //IsComplete = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser),
+                        //Percentage = 0,
+                        //Color = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
+                        //? "success" : "warning",
+
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = completosbM,
+                        Percentage = decimal.Parse(avancesbM.ToString()),
+                        Color = completosbM ? "success" : "warning"
+
+                        //Id = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
+                    });
+
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "ALARMA",
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = _alarmRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser),
+                        Percentage = 0,
+                        Color = _alarmRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)
+                        ? "success" : "warning",
+                        Id = _alarmRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
+                    });
+
+
+
+                    data1.Progress = _fridgeRepository.ProgressTask(data1.ControlCenters.Count(x=>x.IsComplete.Equals(true)), 9);
                     break;
                     case 2:
                     data1.ControlCenters.Add(new ControlCenter()
@@ -443,17 +554,7 @@ namespace api.rebel_wings.Controllers
                             ? "success" : "warning",
                         Id = _riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
                     });
-                    data1.ControlCenters.Add(new ControlCenter()
-                    {
-                        Name = "PRODUCTO EN RIESGO",
-                        Description = "",
-                        IsPercentageOrComplete = false,
-                        IsComplete = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser),
-                        Percentage = 0,
-                        Color = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)
-                            ? "success" : "warning",
-                        Id = _riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
-                    });
+
                     data1.ControlCenters.Add(new ControlCenter()
                     {
                         Name = "TRANSFERENCIAS",
@@ -474,12 +575,13 @@ namespace api.rebel_wings.Controllers
                   switch (menu1)
                   {  
                    case 1:
-                     
-                    if (DateTime.Now >=  inicio && DateTime.Now < inicio.AddHours(3)) {
-                       middleDay = middleDay.AddDays(-1);
-                       endDay = endDay.AddDays(-1);
-                    }
-                    data1.ControlCenters.Add(new ControlCenter()
+
+                            if (DateTime.Now >= inicio && DateTime.Now < inicio.AddHours(3))
+                            {
+                                middleDay = middleDay.AddDays(-1);
+                                endDay = endDay.AddDays(-1);
+                            }
+                            data1.ControlCenters.Add(new ControlCenter()
                     {
                         Name = "Validación de asistencias",
                         Description = "",
@@ -506,7 +608,7 @@ namespace api.rebel_wings.Controllers
 
                     data1.ControlCenters.Add(new ControlCenter()
                     {
-                        Name = "Stock de Pollo",
+                        Name = "INVENTARIO SEMANAL",
                         Description = "",
                         IsPercentageOrComplete = false,
                         IsComplete = false,
@@ -570,8 +672,84 @@ namespace api.rebel_wings.Controllers
                         Id = _cashRegisterShortageRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
                     });
 
+                    string coment = " ";
+                    var avancesb = 0;
+                        var sb = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser && e.Tipo == 1);
+                        if (sb == null) { avancesb = 0; }
+                        else { if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 1 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 2 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 3 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sb.Id && a.Type == 4 && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+                               //if (_banosMatutinoRepository.GetAll().FirstOrDefault(a => a.Id == sb.Id && a.Comment.ToString() != coment.ToString() && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
 
-                    data1.Progress = _fridgeRepository.ProgressTask(data1.ControlCenters.Count(x=>x.IsComplete.Equals(true)), 7);
+                            }
+                        bool completosb;
+                        if (avancesb == 4) { completosb = true; } else { completosb = false; }
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "BAÑOS MATUTINO HOMBRES",
+                        //Description = "",
+                        //IsPercentageOrComplete = false,
+                        //IsComplete = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser),
+                        //Percentage = 0,
+                        //Color = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
+                        //? "success" : "warning",
+
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = completosb,
+                        Percentage = decimal.Parse(avancesb.ToString()),
+                        Color = completosb ? "success" : "warning"
+
+                        //Id = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
+                    });
+
+                    string comentM = " ";
+                    var avancesbM = 0;
+                        var sbM = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser && e.Tipo == 2);
+                        if (sbM == null) { avancesbM = 0; }
+                        else { if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 1 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 2 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 3 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               if (_photoBanosMatutinoRepository.GetAll().FirstOrDefault(a => a.BanosMatutinoId == sbM.Id && a.Type == 4 && a.CreatedBy == idUser) != null) { avancesbM = avancesbM + 1; }
+                               //if (_banosMatutinoRepository.GetAll().FirstOrDefault(a => a.Id == sb.Id && a.Comment.ToString() != coment.ToString() && a.CreatedBy == idUser) != null) { avancesb = avancesb + 1; }
+
+                            }
+                        bool completosbM;
+                        if (avancesbM == 4) { completosbM = true; } else { completosbM = false; }
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "BAÑOS MATUTINO MUJERES",
+                        //Description = "",
+                        //IsPercentageOrComplete = false,
+                        //IsComplete = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser),
+                        //Percentage = 0,
+                        //Color = _banosMatutinoRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)
+                        //? "success" : "warning",
+
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = completosbM,
+                        Percentage = decimal.Parse(avancesbM.ToString()),
+                        Color = completosbM ? "success" : "warning"
+
+                        //Id = _banosMatutinoRepository.GetAll().FirstOrDefault(e => e.Branch == branch && e.CreatedDate >= startDay && e.CreatedDate <= middleDay && e.CreatedBy == idUser)?.Id
+                    });
+
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "PRODUCTO EN RIESGO",
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser),
+                        Percentage = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser) ? decimal.Parse(_riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Code) : 0,
+                        Color = _riskProductRepository.GetAll().Any(e => e.BranchId == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)
+                            ? "success" : "warning",
+                        Id = _riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= middleDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
+                    });
+
+
+                    data1.Progress = _fridgeRepository.ProgressTask(data1.ControlCenters.Count(x=>x.IsComplete.Equals(true)), 9);
                     break;
 
                     case 2:

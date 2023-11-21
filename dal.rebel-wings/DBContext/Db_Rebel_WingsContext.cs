@@ -122,6 +122,8 @@ namespace dal.rebel_wings.DBContext
         public virtual DbSet<ValidationGa> ValidationGas { get; set; }
         public virtual DbSet<WaitlistTable> WaitlistTables { get; set; }
         public virtual DbSet<WashBasinWithSoapPaper> WashBasinWithSoapPapers { get; set; }
+        public virtual DbSet<_25pts> IT_25PTs { get; set; }
+        public virtual DbSet<Tiempos> IT_TIEMPOs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -150,6 +152,33 @@ namespace dal.rebel_wings.DBContext
                 entity.Property(e => e.UpdatedDate)
                     .HasColumnType("datetime")
                     .HasColumnName("updated_date");
+
+                entity.Property(e => e.TipoF1)
+                    .HasMaxLength(500)
+                    .IsUnicode(false)
+                    .HasColumnName("tipo_f1");
+
+                entity.Property(e => e.TipoF2)
+                    .HasMaxLength(500)
+                    .IsUnicode(false)
+                    .HasColumnName("tipo_f2");
+
+                entity.Property(e => e.TipoF3)
+                    .HasMaxLength(500)
+                    .IsUnicode(false)
+                    .HasColumnName("tipo_f3");
+
+                entity.Property(e => e.LitrosF1)
+                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnName("litros_f1");
+
+                entity.Property(e => e.LitrosF2)
+                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnName("litros_f2");
+
+                entity.Property(e => e.LitrosF3)
+                    .HasColumnType("decimal(18, 0)")
+                    .HasColumnName("litros_f3");
 
                 entity.HasOne(d => d.CreatedByNavigation)
                     .WithMany(p => p.Alarms)
@@ -220,6 +249,77 @@ namespace dal.rebel_wings.DBContext
                     .HasForeignKey(d => d.StatusId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Albaran_Cat_Status_Albaran");
+            });
+
+            modelBuilder.Entity<Tiempos>(entity =>
+            {
+               
+                entity.ToTable("IT_TIEMPOS");
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.IdComanda).HasColumnName("IDCOMANDA");
+                entity.Property(e => e.CodArticulo).HasColumnName("CODARTICULO");
+                entity.Property(e => e.Orden).HasColumnName("ORDEN");
+                entity.Property(e => e.Posicion).HasColumnName("POSICION");
+                entity.Property(e => e.Terminal)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("TERMINAL");
+                entity.Property(e => e.Hora)
+                    .HasColumnType("datetime")
+                    .HasColumnName("HORA");
+                entity.Property(e => e.Descripcion)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("DESCRIPCION");
+                entity.Property(e => e.Unidades).HasColumnName("UNIDADES");
+                entity.Property(e => e.Minutos).HasColumnName("MINUTOS");
+                entity.Property(e => e.EnTiempo)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("ENTIEMPO");
+                entity.Property(e => e.Sucursal)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("SUCURSAL");
+
+            });
+
+            modelBuilder.Entity<_25pts>(entity =>
+            {
+                
+                entity.ToTable("IT_25PTS");
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.FechaIni)
+                    .HasColumnType("datetime")
+                    .HasColumnName("FECHAINI");
+                entity.Property(e => e.Sala).HasColumnName("SALA");
+                entity.Property(e => e.Mesa).HasColumnName("MESA");
+                entity.Property(e => e.TotalAyc).HasColumnName("TOTAL_AYC");
+                entity.Property(e => e.Cobros).HasColumnName("COBROS");
+                entity.Property(e => e.CobrosMinimos).HasColumnName("COBROS_MINIMOS");
+                entity.Property(e => e.Diferencia).HasColumnName("DIFERENCIA");
+                entity.Property(e => e.Justificacion)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .IsUnicode(false)
+                    .HasColumnName("JUSTIFICACION");
+                entity.Property(e => e.Usuario)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("USUARIO");
+                entity.Property(e => e.Sucursal)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("SUCURSAL");
+
             });
 
             modelBuilder.Entity<AudioVideo>(entity =>
@@ -307,6 +407,9 @@ namespace dal.rebel_wings.DBContext
                     .HasForeignKey(d => d.CreatedBy)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Banos_Matutino_Users");
+
+                entity.Property(e => e.Tipo).HasColumnName("tipo");
+
             });
 
             modelBuilder.Entity<Bar>(entity =>
@@ -1880,6 +1983,8 @@ namespace dal.rebel_wings.DBContext
                     .HasMaxLength(250)
                     .IsUnicode(false)
                     .HasColumnName("photo");
+
+                entity.Property(e => e.Type).HasColumnName("type");
 
                 entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
 

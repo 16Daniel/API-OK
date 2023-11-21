@@ -53,20 +53,28 @@ public class RiskProductController : ControllerBase
         _mapper = mapper;
         _logger = logger;
     }
-    
+
     /// <summary>
     /// GET:
     /// Obtiene por ID de sucursal de los Productos en Riesgo
     /// </summary>
     /// <param name="id">Sucursal</param>
+    /// <param name="turno">Sucursal</param>
     /// <returns></returns>
-    [HttpGet("{id}/Branch")]
+    [HttpGet("{id}/User/{turno}")]
     [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
-    public async Task<ActionResult<ApiResponse<List<RiskProductGetDto>>>> GetByBranchId(int id)
+    public async Task<ActionResult<ApiResponse<List<RiskProductGetDto>>>> GetByBranchId(int id, int turno)
     {
         var response = new ApiResponse<List<RiskProductGetDto>>();
         try
         {
+            DateTime today = DateTime.Now;
+            var inicio = today.AbsoluteStart();
+            var startDay = inicio.AddHours(7);
+            var middleDay = inicio.AddHours(17);     //----> correcta
+            var diant = middleDay.AddDays(-1);
+            var endDay = inicio.AddHours(27);
+
             #region Catalogue
 
             var repository = _mapper.Map<List<ItemsDto>>(_articulosRespositoryBD1.GetAll()
@@ -90,17 +98,33 @@ public class RiskProductController : ControllerBase
 
             #endregion
 
-            var date = DateTime.Now;
-            var alarm = _mapper.Map<List<RiskProductGetDto>>(await _riskProductRepository.GetAllAsyn());
-            alarm = alarm.Where(f => f.BranchId == id && f.CreatedDate >= date.AbsoluteStart() && f.CreatedDate <= date.AbsoluteEnd()).ToList();
-            foreach (var item in alarm)
-            {
-                item.Product = repository.FirstOrDefault(f => f.Codarticulo == item.ProductId)?.Descripcion;
+            if (turno == 1) {
+                var date = DateTime.Now;
+                var alarm = _mapper.Map<List<RiskProductGetDto>>(await _riskProductRepository.GetAllAsyn());
+                alarm = alarm.Where(f => f.CreatedBy == id && f.CreatedDate >= startDay && f.CreatedDate <= middleDay).ToList();
+                foreach (var item in alarm)
+                {
+                    item.Product = repository.FirstOrDefault(f => f.Codarticulo == item.ProductId)?.Descripcion;
+                }
+
+                response.Result = alarm;
+                response.Success = true;
+                response.Message = "Consult was success";
             }
-            
-            response.Result = alarm;
-            response.Success = true;
-            response.Message = "Consult was success";
+            else
+            {
+                var date = DateTime.Now;
+                var alarm = _mapper.Map<List<RiskProductGetDto>>(await _riskProductRepository.GetAllAsyn());
+                alarm = alarm.Where(f => f.CreatedBy == id && f.CreatedDate >= middleDay && f.CreatedDate <= endDay).ToList();
+                foreach (var item in alarm)
+                {
+                    item.Product = repository.FirstOrDefault(f => f.Codarticulo == item.ProductId)?.Descripcion;
+                }
+
+                response.Result = alarm;
+                response.Success = true;
+                response.Message = "Consult was success";
+            }
         }
         catch (Exception ex)
         {

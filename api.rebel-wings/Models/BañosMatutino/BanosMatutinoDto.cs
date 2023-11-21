@@ -4,7 +4,10 @@ namespace api.rebel_wings.Models.BanosMatutino
 {
   public class BanosMatutinoDto
   {
-    [DefaultValue(0)]
+    public BanosMatutinoDto()
+        {
+            PhotoBanosMatutinos = new HashSet<PhotoBanosMatutinoDto>();
+        }
     public int Id { get; set; }
     /// <summary>
     /// Sucursal
@@ -21,5 +24,6 @@ namespace api.rebel_wings.Models.BanosMatutino
     public int? UpdatedBy { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public virtual ICollection<PhotoBanosMatutinoDto> PhotoBanosMatutinos { get; set; }
+    public int Tipo { get; set; }
   }
 }

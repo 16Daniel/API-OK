@@ -22,5 +22,6 @@ namespace biz.rebel_wings.Entities
 
         public virtual User CreatedByNavigation { get; set; } = null!;
         public virtual ICollection<PhotoBanosMatutino> PhotoBanosMatutinos { get; set; }
+        public int Tipo { get; set; }
     }
 }

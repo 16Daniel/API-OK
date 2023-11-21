@@ -5251,6 +5251,10 @@ namespace dal.bd2.DBContext
                     .HasMaxLength(1)
                     .IsFixedLength();
 
+                entity.Property(e => e.Filtro)
+                   .HasColumnName("FILTRO")
+                   .HasMaxLength(50);
+
                 entity.Property(e => e.Precioproveedor).HasColumnName("PRECIOPROVEEDOR");
 
                 entity.Property(e => e.Proveedor).HasColumnName("PROVEEDOR");
@@ -5272,6 +5276,16 @@ namespace dal.bd2.DBContext
                     .HasMaxLength(50);
 
                 entity.Property(e => e.ValorAyc).HasColumnName("VALOR_AYC");
+
+                entity.Property(e => e.Cerveza)
+                .HasColumnName("CERVEZA")
+                .HasMaxLength(1)
+                .IsFixedLength();
+
+                entity.Property(e => e.RegularizaSemanal)
+                .HasColumnName("REGULARIZA_SEMANAL")
+                .HasMaxLength(1)
+                .IsFixedLength();
 
                 entity.HasOne(d => d.CodarticuloNavigation)
                     .WithOne(p => p.Articuloscamposlibre)
