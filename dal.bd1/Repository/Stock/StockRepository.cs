@@ -411,7 +411,6 @@ namespace dal.bd1.Repository.Stock
                 {
                     var FechV = diAsignado;
 
-
                     biz.bd1.Entities.Inventario _inventario = new biz.bd1.Entities.Inventario();
 
                     _inventario.Fecha = FechV.Date;

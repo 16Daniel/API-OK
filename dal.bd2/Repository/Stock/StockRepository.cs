@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using biz.bd2.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace dal.bd2.Repository.Stock
 {
@@ -809,220 +810,250 @@ namespace dal.bd2.Repository.Stock
 
         public List<Reporte> GetReporteV(DateTime Date)
         {
-            var basesuc =
-                from almacen in _context.Almacens
-                orderby almacen.Codalmacen ascending
-                where (almacen.Notas.Contains("RW"))
-                select new Reporte()
-                {
-                    cod = almacen.Codalmacen,
-                    Sucursal = almacen.Nombrealmacen,
+            List<Reporte> reportes = new List<Reporte>();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_INV_VESP_REPORTE";
+            cmd.Parameters.Add("@FECHA", System.Data.SqlDbType.VarChar,10).Value = Date.ToString("dd/MM/yyyy");
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read()) {
+                Reporte repp = new Reporte();
+                repp.cod = (string)reader["COD"];
+                repp.Sucursal = (string)reader["SUCURSAL"];
+                repp.Articulo = (string)reader["ARTICULO"];
+                repp.Seccion = (string)reader["SECCION"];
+                repp.InvAyer = (string)reader["INVAYER"];
+                repp.ConsumoAyer = (double)reader["CONSUMOAYER"];
+                repp.TraspasoAyer = (double)reader["TRASPASOAYER"];
+                repp.InvHoy = (string)reader["INVHOY"];
+                repp.Captura = (DateTime)reader["CAPTURA"];
+                repp.InvFormula = (double)reader["INVFORMULA"];
+                repp.Diferencia = (double)reader["DIFERENCIA"];
+                reportes.Add(repp);
+            }
+            connection.Close();
+            //var basesuc =
+            //    from almacen in _context.Almacens
+            //    orderby almacen.Codalmacen ascending
+            //    where (almacen.Notas.Contains("RW"))
+            //    select new Reporte()
+            //    {
+            //        cod = almacen.Codalmacen,
+            //        Sucursal = almacen.Nombrealmacen,
 
-                };
+            //    };
 
-            var artreg =
-                from art in _context.Articulos1
-                join camp in _context.Articuloscamposlibres on art.Codarticulo equals camp.Codarticulo
-                join sec in _context.Secciones on art.Seccion equals sec.Numseccion /////////---seccion
-                orderby art.Codarticulo ascending
-                where (camp.RegularizaSemanal == "T")
-                select new Reporte() { Articulo = art.Descripcion, Seccion = sec.Descripcion };
+            //var artreg =
+            //    from art in _context.Articulos1
+            //    join camp in _context.Articuloscamposlibres on art.Codarticulo equals camp.Codarticulo
+            //    join sec in _context.Secciones on art.Seccion equals sec.Numseccion /////////---seccion
+            //    orderby art.Codarticulo ascending
+            //    where (camp.RegularizaSemanal == "T")
+            //    select new Reporte() { Articulo = art.Descripcion, Seccion = sec.Descripcion };
 
-            var CrossJoinResult =
-                from sucursales in basesuc
-                from articulos in artreg
-                select new Reporte()
-                {
-                    cod = sucursales.cod,
-                    Sucursal = sucursales.Sucursal,
-                    Articulo = articulos.Articulo,
-                    Seccion = articulos.Seccion, /////////---seccion
-                    InvAyer = "0",
-                    InvHoy = "0",
-                    ConsumoAyer = 0,
-                    TraspasoAyer = 0,
-                    InvFormula = 0,
-                    Captura = DateTime.Now.Date,
+            //var CrossJoinResult =
+            //    from sucursales in basesuc
+            //    from articulos in artreg
+            //    select new Reporte()
+            //    {
+            //        cod = sucursales.cod,
+            //        Sucursal = sucursales.Sucursal,
+            //        Articulo = articulos.Articulo,
+            //        Seccion = articulos.Seccion, /////////---seccion
+            //        InvAyer = "0",
+            //        InvHoy = "0",
+            //        ConsumoAyer = 0,
+            //        TraspasoAyer = 0,
+            //        InvFormula = 0,
+            //        Captura = DateTime.Now.Date,
 
-                };
+            //    };
 
-            var inv =
-                from moviment in _context.Moviments
-                join articulo1 in _context.Articulos1 on moviment.Codarticulo equals articulo1.Codarticulo
-                join campos in _context.Articuloscamposlibres on articulo1.Codarticulo equals campos.Codarticulo
-                join almac in _context.Almacens on moviment.Codalmacenorigen equals almac.Codalmacen
-                where (moviment.Fecha.Value.Date == Date.Date) && (moviment.Hora.Value.Hour >= 1 && moviment.Hora.Value.Hour <= 3)
-                where (campos.RegularizaSemanal == "T") && (moviment.Tipo == "REG")
-                orderby articulo1.Descripcion ascending, moviment.Codalmacenorigen ascending
-                group new { moviment, almac, articulo1} by new { moviment.Codalmacenorigen, almac.Nombrealmacen, articulo1.Descripcion, moviment.Unidades, moviment.Hora }into x
-                select new Reporte()
-                {
-                    cod = x.Key.Codalmacenorigen,
-                    Sucursal = x.Key.Nombrealmacen,
-                    Articulo = x.Key.Descripcion,
-                    InvHoy = x.First().moviment.Unidades.Value.ToString(),
-                    Captura = x.Key.Hora.Value,
+            //var inv =
+            //    from moviment in _context.Moviments
+            //    join articulo1 in _context.Articulos1 on moviment.Codarticulo equals articulo1.Codarticulo
+            //    join campos in _context.Articuloscamposlibres on articulo1.Codarticulo equals campos.Codarticulo
+            //    join almac in _context.Almacens on moviment.Codalmacenorigen equals almac.Codalmacen
+            //    where (moviment.Fecha.Value.Date == Date.Date) && (moviment.Hora.Value.Hour >= 1 && moviment.Hora.Value.Hour <= 3)
+            //    where (campos.RegularizaSemanal == "T") && (moviment.Tipo == "REG")
+            //    orderby articulo1.Descripcion ascending, moviment.Codalmacenorigen ascending
+            //    group new { moviment, almac, articulo1 } by new { moviment.Codalmacenorigen, almac.Nombrealmacen, articulo1.Descripcion, moviment.Unidades, moviment.Hora } into x
+            //    select new Reporte()
+            //    {
+            //        cod = x.Key.Codalmacenorigen,
+            //        Sucursal = x.Key.Nombrealmacen,
+            //        Articulo = x.Key.Descripcion,
+            //        InvHoy = x.First().moviment.Unidades.Value.ToString(),
+            //        Captura = x.Key.Hora.Value,
 
-                    //Description = articulo1.Descripcion,
-                    //Price = moviment.Precio.Value,
-                    //Unity = moviment.Unidades.Value,
-                    //UnitMeasure = articulo1.Unidadmedida
-                };
+            //        //Description = articulo1.Descripcion,
+            //        //Price = moviment.Precio.Value,
+            //        //Unity = moviment.Unidades.Value,
+            //        //UnitMeasure = articulo1.Unidadmedida
+            //    };
 
-            var invAyer =
-                from moviment in _context.Moviments
-                join articulo1 in _context.Articulos1 on moviment.Codarticulo equals articulo1.Codarticulo
-                join campos in _context.Articuloscamposlibres on articulo1.Codarticulo equals campos.Codarticulo
-                join almac in _context.Almacens on moviment.Codalmacenorigen equals almac.Codalmacen
-                where (moviment.Fecha.Value.Date == Date.AddDays(-1).Date) && (moviment.Hora.Value.Hour >= 1 && moviment.Hora.Value.Hour <= 3)
-                where (campos.RegularizaSemanal == "T") && (moviment.Tipo == "REG")
-                orderby articulo1.Descripcion ascending, moviment.Codalmacenorigen ascending
-                group new { moviment, almac, articulo1} by new { moviment.Codalmacenorigen, almac.Nombrealmacen, articulo1.Descripcion, moviment.Unidades, moviment.Hora }into x
-                select new Reporte()
-                {
-                    cod = x.Key.Codalmacenorigen,
-                    Sucursal = x.Key.Nombrealmacen,
-                    Articulo = x.Key.Descripcion,
-                    InvAyer = x.First().moviment.Unidades.Value.ToString()
+            //var invAyer =
+            //    from moviment in _context.Moviments
+            //    join articulo1 in _context.Articulos1 on moviment.Codarticulo equals articulo1.Codarticulo
+            //    join campos in _context.Articuloscamposlibres on articulo1.Codarticulo equals campos.Codarticulo
+            //    join almac in _context.Almacens on moviment.Codalmacenorigen equals almac.Codalmacen
+            //    where (moviment.Fecha.Value.Date == Date.AddDays(-1).Date) && (moviment.Hora.Value.Hour >= 1 && moviment.Hora.Value.Hour <= 3)
+            //    where (campos.RegularizaSemanal == "T") && (moviment.Tipo == "REG")
+            //    orderby articulo1.Descripcion ascending, moviment.Codalmacenorigen ascending
+            //    group new { moviment, almac, articulo1 } by new { moviment.Codalmacenorigen, almac.Nombrealmacen, articulo1.Descripcion, moviment.Unidades, moviment.Hora } into x
+            //    select new Reporte()
+            //    {
+            //        cod = x.Key.Codalmacenorigen,
+            //        Sucursal = x.Key.Nombrealmacen,
+            //        Articulo = x.Key.Descripcion,
+            //        InvAyer = x.First().moviment.Unidades.Value.ToString()
 
-                    //Description = articulo1.Descripcion,
-                    //Price = moviment.Precio.Value,
-                    //Unity = moviment.Unidades.Value,
-                    //UnitMeasure = articulo1.Unidadmedida
-                };
-
-
-
-
-
-
-            var consumo =
-                from albvt in _context.Albventaconsumos
-                join albvtcab in _context.Albventacabs on new
-                {
-                    albvt.Numserie,
-                    albvt.Numalbaran,
-                    albvt.N
-                }
-                equals new
-                {
-                    albvtcab.Numserie,
-                    albvtcab.Numalbaran,
-                    albvtcab.N
-                }
-                join art in _context.Articulos1 on albvt.Codarticulo equals art.Codarticulo
-                join almac in _context.Almacens on albvt.Codalmacen equals almac.Codalmacen
-                join artcamp in _context.Articuloscamposlibres on albvt.Codarticulo equals artcamp.Codarticulo
-                where (albvtcab.Fecha.Value.Date == Date.AddDays(-1).Date) && (artcamp.RegularizaSemanal == "T")
-                group new { albvt, albvtcab, almac, art, artcamp } by new { almac.Nombrealmacen, art.Descripcion } into x
-                select new Reporte()
-                {
-
-                    Sucursal = x.Key.Nombrealmacen,
-                    Articulo = x.Key.Descripcion,
-                    ConsumoAyer = x.Sum(cn => cn.albvt.Consumo.Value),
-
-                    //Description = articulo1.Descripcion,
-                    //Price = moviment.Precio.Value,
-                    //Unity = moviment.Unidades.Value,
-                    //UnitMeasure = articulo1.Unidadmedida
-                };
-            var compras =
-                from albcomp in _context.Albcompralins
-                join almac in _context.Almacens on albcomp.Codalmacen equals almac.Codalmacen
-                join art in _context.Articulos1 on albcomp.Codarticulo equals art.Codarticulo
-                join albcompcab in _context.Albcompracabs on new
-                {
-                    albcomp.Numserie,
-                    albcomp.Numalbaran,
-                    albcomp.N
-                }
-                equals new
-                {
-                    albcompcab.Numserie,
-                    albcompcab.Numalbaran,
-                    albcompcab.N
-                }
-                join artcamp in _context.Articuloscamposlibres on art.Codarticulo equals artcamp.Codarticulo
-                where (albcompcab.Fechaalbaran.Value.Date == Date.AddDays(-1).Date) && (artcamp.RegularizaSemanal == "T")
-                group new { albcomp, albcompcab, almac, art, artcamp } by new { almac.Nombrealmacen, art.Descripcion } into x
-                select new Reporte()
-                {
-                    Sucursal = x.Key.Nombrealmacen,
-                    Articulo = x.Key.Descripcion,
-                    TraspasoAyer = x.Sum(cn => cn.albcomp.Unidadestotal.Value),
-
-                };
-
-            var list0 = from ayer in CrossJoinResult
-                        join hoy in invAyer.Distinct() on new { ayer.Sucursal, ayer.Articulo } equals new { hoy.Sucursal, hoy.Articulo } into inventarios
-                        from ed in inventarios.DefaultIfEmpty()
-
-                        select new Reporte()
-                        {
-                            cod = ayer.cod,
-                            Sucursal = ayer.Sucursal,
-                            Articulo = ayer.Articulo,
-                            Seccion = ayer.Seccion, /////////---seccion
-                            InvAyer = ed.InvAyer == null ? "SIN CAPTURA" : ed.InvAyer,
+            //        //Description = articulo1.Descripcion,
+            //        //Price = moviment.Precio.Value,
+            //        //Unity = moviment.Unidades.Value,
+            //        //UnitMeasure = articulo1.Unidadmedida
+            //    };
 
 
-                        };
-
-            var list1 = from ayer in list0
-                        join hoy in inv on new { ayer.Sucursal, ayer.Articulo } equals new { hoy.Sucursal, hoy.Articulo } into inventarios
-                        from ed in inventarios.DefaultIfEmpty()
-
-                        select new Reporte()
-                        {
-                            cod = ayer.cod,
-                            Sucursal = ayer.Sucursal,
-                            Articulo = ayer.Articulo,
-                            Seccion = ayer.Seccion, /////////---seccion
-                            InvAyer = ayer.InvAyer,
-                            InvHoy = ed.InvHoy == null ? "SIN CAPTURA" : ed.InvHoy,
-                            Captura = ed.Captura == null ? DateTime.Now.Date : ed.Captura,
-
-                        };
-            var list2 = from x in list1
-                        join z in consumo on new { x.Sucursal, x.Articulo } equals new { z.Sucursal, z.Articulo } into xz
-                        from ed in xz.DefaultIfEmpty()
-
-                        select new Reporte()
-                        {
-                            cod = x.cod,
-                            Sucursal = x.Sucursal,
-                            Articulo = x.Articulo,
-                            Seccion = x.Seccion, /////////---seccion
-                            InvAyer = x.InvAyer,
-                            InvHoy = x.InvHoy,
-                            ConsumoAyer = ed.ConsumoAyer == null ? 0 : ed.ConsumoAyer,
-                            Captura = x.Captura,
-
-                        };
-            var list3 = from x in list2
-                        join z in compras on new { x.Sucursal, x.Articulo } equals new { z.Sucursal, z.Articulo } into xz
-                        from ed in xz.DefaultIfEmpty()
-
-                        select new Reporte()
-                        {
-                            cod = x.cod,
-                            Sucursal = x.Sucursal,
-                            Articulo = x.Articulo,
-                            Seccion = x.Seccion, /////////---seccion
-                            InvAyer = x.InvAyer,
-                            InvHoy = x.InvHoy,
-                            ConsumoAyer = x.ConsumoAyer,
-                            TraspasoAyer = ed.TraspasoAyer == null ? 0 : ed.TraspasoAyer,
-                            InvFormula = (double.Parse((x.InvAyer == "SIN CAPTURA" ? "0" : x.InvAyer)) + (ed.TraspasoAyer == null ? 0 : ed.TraspasoAyer)) - (x.ConsumoAyer),
-                            Diferencia = ((double.Parse(x.InvHoy == "SIN CAPTURA" ? "0" : x.InvHoy)) - ((double.Parse((x.InvAyer == "SIN CAPTURA" ? "0" : x.InvAyer)) + (ed.TraspasoAyer == null ? 0 : ed.TraspasoAyer)) - (x.ConsumoAyer))),
-                            Captura = x.Captura,
-                        };
 
 
-            //return inv.Distinct().ToList();
-            //var list4 = list3.GroupBy(x => new { x.Sucursal, x.Articulo }).Select(x => x.First()).ToList();
-            return list3.OrderBy(x => x.Articulo).ThenBy(x => x.cod).ToList();
+
+
+            //var consumo =
+            //    from albvt in _context.Albventaconsumos
+            //    join albvtcab in _context.Albventacabs on new
+            //    {
+            //        albvt.Numserie,
+            //        albvt.Numalbaran,
+            //        albvt.N
+            //    }
+            //    equals new
+            //    {
+            //        albvtcab.Numserie,
+            //        albvtcab.Numalbaran,
+            //        albvtcab.N
+            //    }
+            //    join art in _context.Articulos1 on albvt.Codarticulo equals art.Codarticulo
+            //    join almac in _context.Almacens on albvt.Codalmacen equals almac.Codalmacen
+            //    join artcamp in _context.Articuloscamposlibres on albvt.Codarticulo equals artcamp.Codarticulo
+            //    where (albvtcab.Fecha.Value.Date == Date.AddDays(-1).Date) && (artcamp.RegularizaSemanal == "T")
+            //    group new { albvt, albvtcab, almac, art, artcamp } by new { almac.Nombrealmacen, art.Descripcion } into x
+            //    select new Reporte()
+            //    {
+
+            //        Sucursal = x.Key.Nombrealmacen,
+            //        Articulo = x.Key.Descripcion,
+            //        ConsumoAyer = x.Sum(cn => cn.albvt.Consumo.Value),
+
+            //        //Description = articulo1.Descripcion,
+            //        //Price = moviment.Precio.Value,
+            //        //Unity = moviment.Unidades.Value,
+            //        //UnitMeasure = articulo1.Unidadmedida
+            //    };
+            //var compras =
+            //    from albcomp in _context.Albcompralins
+            //    join almac in _context.Almacens on albcomp.Codalmacen equals almac.Codalmacen
+            //    join art in _context.Articulos1 on albcomp.Codarticulo equals art.Codarticulo
+            //    join albcompcab in _context.Albcompracabs on new
+            //    {
+            //        albcomp.Numserie,
+            //        albcomp.Numalbaran,
+            //        albcomp.N
+            //    }
+            //    equals new
+            //    {
+            //        albcompcab.Numserie,
+            //        albcompcab.Numalbaran,
+            //        albcompcab.N
+            //    }
+            //    join artcamp in _context.Articuloscamposlibres on art.Codarticulo equals artcamp.Codarticulo
+            //    where (albcompcab.Fechaalbaran.Value.Date == Date.AddDays(-1).Date) && (artcamp.RegularizaSemanal == "T")
+            //    group new { albcomp, albcompcab, almac, art, artcamp } by new { almac.Nombrealmacen, art.Descripcion } into x
+            //    select new Reporte()
+            //    {
+            //        Sucursal = x.Key.Nombrealmacen,
+            //        Articulo = x.Key.Descripcion,
+            //        TraspasoAyer = x.Sum(cn => cn.albcomp.Unidadestotal.Value),
+
+            //    };
+
+            //var list0 = from ayer in CrossJoinResult
+            //            join hoy in invAyer.Distinct() on new { ayer.Sucursal, ayer.Articulo } equals new { hoy.Sucursal, hoy.Articulo } into inventarios
+            //            from ed in inventarios.DefaultIfEmpty()
+
+            //            select new Reporte()
+            //            {
+            //                cod = ayer.cod,
+            //                Sucursal = ayer.Sucursal,
+            //                Articulo = ayer.Articulo,
+            //                Seccion = ayer.Seccion, /////////---seccion
+            //                InvAyer = ed.InvAyer == null ? "SIN CAPTURA" : ed.InvAyer,
+
+
+            //            };
+
+            //var list1 = from ayer in list0
+            //            join hoy in inv on new { ayer.Sucursal, ayer.Articulo } equals new { hoy.Sucursal, hoy.Articulo } into inventarios
+            //            from ed in inventarios.DefaultIfEmpty()
+
+            //            select new Reporte()
+            //            {
+            //                cod = ayer.cod,
+            //                Sucursal = ayer.Sucursal,
+            //                Articulo = ayer.Articulo,
+            //                Seccion = ayer.Seccion, /////////---seccion
+            //                InvAyer = ayer.InvAyer,
+            //                InvHoy = ed.InvHoy == null ? "SIN CAPTURA" : ed.InvHoy,
+            //                Captura = ed.Captura == null ? DateTime.Now.Date : ed.Captura,
+
+            //            };
+            //var list2 = from x in list1
+            //            join z in consumo on new { x.Sucursal, x.Articulo } equals new { z.Sucursal, z.Articulo } into xz
+            //            from ed in xz.DefaultIfEmpty()
+
+            //            select new Reporte()
+            //            {
+            //                cod = x.cod,
+            //                Sucursal = x.Sucursal,
+            //                Articulo = x.Articulo,
+            //                Seccion = x.Seccion, /////////---seccion
+            //                InvAyer = x.InvAyer,
+            //                InvHoy = x.InvHoy,
+            //                ConsumoAyer = ed.ConsumoAyer == null ? 0 : ed.ConsumoAyer,
+            //                Captura = x.Captura,
+
+            //            };
+            //var list3 = from x in list2
+            //            join z in compras on new { x.Sucursal, x.Articulo } equals new { z.Sucursal, z.Articulo } into xz
+            //            from ed in xz.DefaultIfEmpty()
+
+            //            select new Reporte()
+            //            {
+            //                cod = x.cod,
+            //                Sucursal = x.Sucursal,
+            //                Articulo = x.Articulo,
+            //                Seccion = x.Seccion, /////////---seccion
+            //                InvAyer = x.InvAyer,
+            //                InvHoy = x.InvHoy,
+            //                ConsumoAyer = x.ConsumoAyer,
+            //                TraspasoAyer = ed.TraspasoAyer == null ? 0 : ed.TraspasoAyer,
+            //                InvFormula = (double.Parse((x.InvAyer == "SIN CAPTURA" ? "0" : x.InvAyer)) + (ed.TraspasoAyer == null ? 0 : ed.TraspasoAyer)) - (x.ConsumoAyer),
+            //                Diferencia = ((double.Parse(x.InvHoy == "SIN CAPTURA" ? "0" : x.InvHoy)) - ((double.Parse((x.InvAyer == "SIN CAPTURA" ? "0" : x.InvAyer)) + (ed.TraspasoAyer == null ? 0 : ed.TraspasoAyer)) - (x.ConsumoAyer))),
+            //                Captura = x.Captura,
+            //            };
+
+
+            ////return inv.Distinct().ToList();
+            ////var list4 = list3.GroupBy(x => new { x.Sucursal, x.Articulo }).Select(x => x.First()).ToList();
+
+
+            //return list3.OrderBy(x => x.Articulo).ThenBy(x => x.cod).ToList();
+
+            
+            return reportes;
         }
 
 
