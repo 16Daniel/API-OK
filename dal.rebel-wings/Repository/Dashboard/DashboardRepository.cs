@@ -209,8 +209,6 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
         #endregion
 
         #region Omissions Activities
-        
-        
 
         List<bool> list = new List<bool>();
         var count = 0;
@@ -2440,6 +2438,8 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
         var taskAllOmittedActivities = new List<biz.rebel_wings.Models.Dashboard.Task>();
         // Get branches from regional
         var branches = _context.CatSucursals.Where(f => f.UserId == regional).Select(s => s.BranchId).ToList();
+
+        //var branches = _context.CatSucursals.Where(f => f.Status == true && f.StateId == city).Select(s => s.BranchId).ToList();
         // Iterate by branch
         foreach (var branch in branches)
         {
@@ -2573,7 +2573,9 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
         var byBranches = new List<DashboardAdminPerformanceByBranch>();
         var taskAllOmittedActivities = new List<TaskPerShifts>();
         // Get branches from regional
-        var branches = _context.CatSucursals.Where(f => f.UserId == regional).Select(s => s.BranchId).ToList();
+        var branches = regional<0 ? _context.CatSucursals.Where(f => f.Status == true && f.StateId == city).Select(s => s.BranchId).ToList() :  _context.CatSucursals.Where(f => f.UserId == regional).Select(s => s.BranchId).ToList();
+
+        
         // Iterate by branch
         foreach (var branch in branches)
         {
@@ -2636,7 +2638,9 @@ public class DashboardRepository : GenericRepository<biz.rebel_wings.Entities.Sa
                 totalTask = totalTask + task.Total;
             }
 
-            decimal percentageByTask = Decimal.Divide(1 * 100, totalTask);
+            //decimal percentageByTask = Decimal.Divide(1 * 100, totalTask); 
+            decimal percentageByTask = totalTask>0 ? Decimal.Divide(1 * 100, totalTask) : 0;
+
             //percentageByTask = decimal.Round(percentageByTask, 2, MidpointRounding.ToZero);
             var nocomp = 0;
             var sicomp = 0;
