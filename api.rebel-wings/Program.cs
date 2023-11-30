@@ -124,7 +124,7 @@ using dal.rebel_wings.Repository.Ticket;
 using dal.rebel_wings.Repository.Ticketing;
 using dal.rebel_wings.Repository.TicketTable;
 using dal.rebel_wings.Repository.WashBasinWithSoapPaper;
-
+using api.rebel_wings.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -167,6 +167,8 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddHostedService<JobReporteMensualTemp>();
+builder.Services.AddSingleton<IHostedService, JobReporteMensualTemp>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();

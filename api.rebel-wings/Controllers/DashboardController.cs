@@ -15,6 +15,7 @@ using biz.rebel_wings.Services.Logger;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using biz.rebel_wings.Entities;
+using api.rebel_wings.Jobs;
 
 namespace api.rebel_wings.Controllers;
 /// <summary>
@@ -35,6 +36,8 @@ public class DashboardController : ControllerBase
     private readonly biz.bd2.Repository.Sucursal.ISucursalRepository _sucursalDB2Repository;
     private readonly biz.rebel_wings.Repository.Implementacion.ITiemposRepository _tiemposRepository;
     private readonly biz.rebel_wings.Repository.Implementacion.I25ptsRepository _i25ptsRepository;
+
+    private readonly JobReporteMensualTemp _job;
     /// <summary>
     /// Constructor
     /// </summary>
@@ -51,7 +54,8 @@ public class DashboardController : ControllerBase
         biz.bd1.Repository.Sucursal.ISucursalRepository sucursalDB1Repository,
         biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository,
         ITiemposRepository tiemposRepository,
-        I25ptsRepository i25ptsRepository)
+        I25ptsRepository i25ptsRepository,
+        IServiceScopeFactory serviceScopeFactory)
     {
         _dashboardRepository = dashboardRepository;
         _iRHTrabRepository = iRhTrabRepository;
@@ -63,13 +67,15 @@ public class DashboardController : ControllerBase
         _sucursalDB2Repository = sucursalDB2Repository;
         _tiemposRepository = tiemposRepository;
         _i25ptsRepository = i25ptsRepository;
-    }
-    /// <summary>
-    /// GET:
-    /// Return info to admin page
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("Admin")]
+        _job = new JobReporteMensualTemp(serviceScopeFactory);
+
+}
+   /// <summary>
+   /// GET:
+   /// Return info to admin page
+   /// </summary>
+   /// <returns></returns>
+   [HttpGet("Admin")]
     [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -251,7 +257,7 @@ public class DashboardController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult<ApiResponse<DashboardAdminPerformanceDto>> GetPerformanceGeneral(int city, int regional, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
-        var response = new ApiResponse<DashboardAdminPerformanceDto>();
+        var response = new ApiResponse<DashboardAdminPerformanceDto>();       
         try
         {
             var res = _mapper.Map<DashboardAdminPerformanceDto>(_dashboardRepository.GetAdminPerformance(city, regional, startDate.AbsoluteStart(), endDate.AbsoluteEnd()));
@@ -341,6 +347,11 @@ public class DashboardController : ControllerBase
     public ActionResult<ApiResponse<DashboardAdminPerformanceDto>> GetPerformanceGeneralSupervisor(int city, int regional, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
     {
         var response = new ApiResponse<DashboardAdminPerformanceDto>();
+        var reporte = _job.obtenerReporte(city, regional, startDate, endDate);
+        if (reporte != null)
+        {
+            return StatusCode(200, reporte);
+        }
         try
         {
             var res = _mapper.Map<DashboardAdminPerformanceDto>(_dashboardRepository.GetAdminPerformanceSupervisor(city, regional, startDate.AbsoluteStart(), endDate.AbsoluteEnd()));
