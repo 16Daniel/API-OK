@@ -66,6 +66,7 @@ namespace api.rebel_wings.Jobs
         
             // Obtener fechas del primer día del mes anterior y el último día del mes
             DateTime now = DateTime.Now;
+            now.AddDays(-1);
             DateTime primerDiaMesAnterior;
             DateTime ultimoDiaMesAnterior;
 
@@ -76,8 +77,6 @@ namespace api.rebel_wings.Jobs
             regionalesQro.Add(all);
             List<UserDto> regionalesmx = getRegionales(1);
             regionalesmx.Add(all);  
-            int maxday = now.Day;
-
 
                     primerDiaMesAnterior = new DateTime(now.Year, now.Month, 1);
                     ultimoDiaMesAnterior = new DateTime(now.Year, now.Month, now.Day);
