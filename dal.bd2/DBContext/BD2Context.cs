@@ -17,6 +17,8 @@ namespace dal.bd2.DBContext
         {
         }
 
+        
+
         public virtual DbSet<Accionespromocion> Accionespromocions { get; set; }
         public virtual DbSet<Accionespromocionlin> Accionespromocionlins { get; set; }
         public virtual DbSet<Actividade> Actividades { get; set; }
@@ -1167,6 +1169,7 @@ namespace dal.bd2.DBContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
             modelBuilder.Entity<Accionespromocion>(entity =>
             {
                 entity.HasKey(e => new { e.Idpromocion, e.Idaccion })
