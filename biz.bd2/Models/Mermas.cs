@@ -23,6 +23,19 @@ public class Reporte
 
 }
 
+public class Apps
+{
+    public string Reg { get; set; }
+    public string Cod { get; set; }
+    public string Sucursal { get; set; }
+    public int Codcliente { get; set; }
+    public string App{ get; set; }
+    public double Total { get; set; }
+    public string Mes { get; set; }
+    public string Marca { get; set; }
+
+}
+
 public class Vendedor
 {
     public string Sucursal { get; set; }

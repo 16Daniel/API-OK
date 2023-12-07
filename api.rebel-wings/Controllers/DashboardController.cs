@@ -591,6 +591,34 @@ public class DashboardController : ControllerBase
         return StatusCode(200, response);
     }
 
+    [HttpGet("performance-reporte-apps")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public ActionResult<ApiResponse<List<AppsDto>>> GetPerformanceReporteApp([FromQuery] DateTime initDate, [FromQuery] DateTime endDate)
+    {
+        var response = new ApiResponse<List<AppsDto>>();
+        try
+        {
+            
+                    //DB2
+                    response.Result = _mapper.Map<List<AppsDto>>(
+                        _stockDB2Repository.GetReporteApps(initDate.AbsoluteStart(), endDate.AbsoluteStart()));
+                    
+
+            response.Success = true;
+            response.Message = "Operation was success";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            response.Success = false;
+            response.Message = ex.ToString();
+            return StatusCode(500, response);
+        }
+
+        return StatusCode(200, response);
+    }
 
 
     [HttpGet("performance-venta-vendedor/{city:int}")]
