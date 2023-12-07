@@ -50,12 +50,13 @@ namespace dal.rebel_wings.Repository.Implementacion
                 Sucursal = tiempos.Sucursal
             }).Where(s => s.Hora.Date >= initDate.Date && s.Hora.Date <= endDate.Date && s.Sucursal == sucursal).OrderByDescending(s => s.Hora).ToList();
 
-            int R1=0, R2=0, R3=0;
+            int R1 = 0, R2 = 0, R3 = 0, R4 = 0;
             foreach (var i in TiemposList)
             {
                 if (i.Minutos >= 0 && i.Minutos <= 15) { R1++; }
                 if (i.Minutos >= 16 && i.Minutos <= 25) { R2++; }
                 if (i.Minutos >= 26 && i.Minutos <= 30) { R3++; }
+                if (i.Minutos == -1) { R4++; }
             }
             var multiG = new List<RangosList>();
 
@@ -72,6 +73,12 @@ namespace dal.rebel_wings.Repository.Implementacion
             {
                 nomRango = "26-30 minutos",
                 RangoValor = R3
+            });
+
+            multiG.Add(new RangosList
+            {
+                nomRango = "SIN CONEXIÓN",
+                RangoValor = R4
             });
 
 

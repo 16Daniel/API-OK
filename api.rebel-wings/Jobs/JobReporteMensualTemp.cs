@@ -66,7 +66,7 @@ namespace api.rebel_wings.Jobs
         
             // Obtener fechas del primer día del mes anterior y el último día del mes
             DateTime now = DateTime.Now;
-            now.AddDays(-1);
+            now = now.AddDays(-1);
             DateTime primerDiaMesAnterior;
             DateTime ultimoDiaMesAnterior;
 
@@ -87,7 +87,7 @@ namespace api.rebel_wings.Jobs
                         if (reporte == null)
                         {
 
-                            var response = genrarReporte(1, -1, primerDiaMesAnterior, ultimoDiaMesAnterior);
+                            var response = genrarReporte(2, regional.Id, primerDiaMesAnterior, ultimoDiaMesAnterior);
                             jsondata = JsonConvert.SerializeObject(response);
 
                             try
@@ -115,7 +115,7 @@ namespace api.rebel_wings.Jobs
 
                     foreach (UserDto regional in regionalesmx)
                     {
-                        var reporte = obtenerReporte(1, -1, primerDiaMesAnterior, ultimoDiaMesAnterior);
+                        var reporte = obtenerReporte(1, regional.Id, primerDiaMesAnterior, ultimoDiaMesAnterior);
                         if (reporte == null)
                         {
 
