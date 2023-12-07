@@ -1090,6 +1090,37 @@ namespace dal.bd2.Repository.Stock
             return reportes;
         }
 
+        public List<Apps> GetReporteApps(DateTime DateI, DateTime DateF)
+        {
+            List<Apps> reportes = new List<Apps>();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_VENTA_APPS";
+            cmd.Parameters.Add("@FECHAINI", System.Data.SqlDbType.VarChar, 10).Value = DateI.ToString("dd-MM-yyyy");
+            cmd.Parameters.Add("@FECHAFIN", System.Data.SqlDbType.VarChar, 10).Value = DateF.ToString("dd-MM-yyyy");
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                Apps repp = new Apps();
+                repp.Reg = (string)reader["COD"];
+                repp.Cod = (string)reader["REG"];
+                repp.Sucursal = (string)reader["SUCURSAL"];
+                repp.Codcliente = (int)reader["CODCLIENTE"];
+                repp.App = (string)reader["APP"];
+                repp.Total = (double)reader["TOTAL"];
+                repp.Mes = (string)reader["MES"];
+                repp.Marca = (string)reader["MARCA"];
+                reportes.Add(repp);
+            }
+            connection.Close();
+
+
+
+            return reportes;
+        }
 
     }
 }
