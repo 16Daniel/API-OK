@@ -13,5 +13,6 @@ namespace biz.bd2.Repository.Sucursal
         Boolean getSucursalById(int sucursalId);
         List<RemFront> getSucursales();
         List<biz.bd2.Models.TransferDto> GetBranchList();
+        
     }
 }

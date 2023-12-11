@@ -620,6 +620,79 @@ public class DashboardController : ControllerBase
         return StatusCode(200, response);
     }
 
+    [HttpGet("Sucursales/{city:int}")]
+    public ActionResult<ApiResponse<List<SucursalesFrontDto>>> GetSucursales(int city)
+    {
+        var response = new ApiResponse<List<SucursalesFrontDto>>();
+
+        try
+        {
+
+            switch (city)
+            {
+                case 1:
+                    response.Result = _mapper.Map<List<SucursalesFrontDto>>(
+                        _stockDB2Repository.GetSucursalesF());
+                    response.Message = "success";
+                    break;
+                case 2:
+                    response.Result = _mapper.Map<List<SucursalesFrontDto>>(
+                        _stockDB1Repository.GetSucursalesF());
+                    response.Message = "success";
+                    break;
+                default:
+
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.Result = null;
+            response.Success = false;
+            response.Message = ex.ToString();
+            _logger.LogError($"Something went wrong: {ex.ToString()}");
+            return StatusCode(500, response);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpGet("Ranking/{city:int}/{suc}")]
+    public ActionResult<ApiResponse<List<RankingDto>>> GetRanking(int city, string suc, [FromQuery] DateTime initDate, [FromQuery] DateTime endDate)
+    {
+        var response = new ApiResponse<List<RankingDto>>();
+
+        try
+        {
+
+            switch (city)
+            {
+                case 1:
+                    response.Result = _mapper.Map<List<RankingDto>>(
+                        _stockDB2Repository.GetRkg(suc, initDate.AbsoluteStart(), endDate.AbsoluteStart()));
+                    response.Message = "success";
+                    break;
+                case 2:
+                    response.Result = _mapper.Map<List<RankingDto>>(
+                        _stockDB1Repository.GetRkg(suc, initDate.AbsoluteStart(), endDate.AbsoluteStart()));
+                    response.Message = "success";
+                    break;
+                default:
+
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            response.Result = null;
+            response.Success = false;
+            response.Message = ex.ToString();
+            _logger.LogError($"Something went wrong: {ex.ToString()}");
+            return StatusCode(500, response);
+        }
+
+        return Ok(response);
+    }
 
     [HttpGet("performance-venta-vendedor/{city:int}")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]

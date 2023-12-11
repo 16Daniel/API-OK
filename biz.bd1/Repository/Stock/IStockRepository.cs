@@ -16,8 +16,10 @@ namespace biz.bd1.Repository.Stock
         biz.bd1.Models.StockDto UpdateStock(int codArticulo, string codAlmacen, double cantidad);
         biz.bd1.Models.StockDto UpdateStockV(int codArticulo, string codAlmacen, double cantidad);
         List<biz.bd1.Models.Mermas> GetMermas(int branch, DateTime initDate, DateTime endDate);
+        List<biz.bd1.Models.Ranking> GetRkg(string suc, DateTime initDate, DateTime endDate);
         List<biz.bd1.Models.Reporte> GetReporte(DateTime Date);
         List<biz.bd1.Models.Reporte> GetReporteV(DateTime Date);
+        List<biz.bd1.Models.SucursalesFront> GetSucursalesF();
         List<biz.bd1.Models.Vendedor> GetVentaVendedor(DateTime initDate, DateTime endDate);
         List<biz.bd1.Models.Filtro> GetVentaVendedorFiltro(DateTime initDate, DateTime endDate);
     }

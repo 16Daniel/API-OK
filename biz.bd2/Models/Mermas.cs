@@ -36,6 +36,23 @@ public class Apps
 
 }
 
+public class SucursalesFront
+{
+    public string Idfront { get; set; }
+    public string Titulo { get; set; }
+}
+
+public class Ranking
+{
+    public int Cod { get; set; }
+    public string Descripcion { get; set; }
+    public string Seccion { get; set; }
+    public double Unidades { get; set; }
+    public double Importe { get; set; }
+    public double Porcentaje { get; set; }
+
+}
+
 public class Vendedor
 {
     public string Sucursal { get; set; }

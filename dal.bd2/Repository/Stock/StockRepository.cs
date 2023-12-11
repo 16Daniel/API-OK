@@ -1122,5 +1122,60 @@ namespace dal.bd2.Repository.Stock
             return reportes;
         }
 
+        public List<SucursalesFront> GetSucursalesF()
+        {
+            List<SucursalesFront> reportes = new List<SucursalesFront>();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_SUCURSALES";
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                SucursalesFront repp = new SucursalesFront();
+                repp.Idfront = (string)reader["COD"];
+                repp.Titulo = (string)reader["SUCURSAL"];
+                reportes.Add(repp);
+            }
+            connection.Close();
+
+
+
+            return reportes;
+        }
+
+        public List<Ranking> GetRkg(string branch, DateTime initDate, DateTime endDate)
+        {
+            List<Ranking> reportes = new List<Ranking>();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_RANKING";
+            cmd.Parameters.Add("@FECHAINI", System.Data.SqlDbType.VarChar, 10).Value = initDate.ToString("dd-MM-yyyy");
+            cmd.Parameters.Add("@FECHAFIN", System.Data.SqlDbType.VarChar, 10).Value = endDate.ToString("dd-MM-yyyy");
+            cmd.Parameters.Add("@SERIE", System.Data.SqlDbType.VarChar, 2).Value = branch.ToString();
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                Ranking repp = new Ranking();
+                repp.Cod = (int)reader["COD"];
+                repp.Descripcion = (string)reader["DESCRIPCION"];
+                repp.Seccion = (string)reader["SECCION"];
+                repp.Unidades = (double)reader["UDS"];
+                repp.Importe = (double)reader["IMPORTE"];
+                repp.Porcentaje = (double)reader["PORCENTAJE"];
+                reportes.Add(repp);
+            }
+            connection.Close();
+
+
+
+            return reportes;
+        }
+
     }
 }

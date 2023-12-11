@@ -37,5 +37,6 @@ namespace dal.bd2.Repository.Sucursal
             return branchList;
         }
 
+
     }
 }
