@@ -224,6 +224,7 @@ namespace api.rebel_wings.Jobs
                         new(){ Name = resultT[0].nomRango, Value = resultT[0].RangoValor },
                         new(){ Name = resultT[1].nomRango, Value = resultT[1].RangoValor },
                         new(){ Name = resultT[2].nomRango, Value = resultT[2].RangoValor },
+                        new(){ Name = resultT[3].nomRango, Value = resultT[3].RangoValor },
 
                     }
                     });
