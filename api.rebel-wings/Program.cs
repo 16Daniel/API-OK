@@ -168,7 +168,7 @@ builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddHostedService<JobReporteMensualTemp>();
-builder.Services.AddSingleton<IHostedService, JobReporteMensualTemp>();
+builder.Services.AddHostedService<JobUltimaActualizacion>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();
