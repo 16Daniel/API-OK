@@ -11,6 +11,7 @@ public class Mermas
     public double Unity { get; set; }
     public double Price { get; set; }
     public string UnitMeasure { get; set; }
+    public DateTime Fecha { get; set; } 
 }
 
 public class SucursalesFront

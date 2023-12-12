@@ -16,6 +16,10 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using biz.rebel_wings.Entities;
 using api.rebel_wings.Jobs;
+using biz.bd1.Models;
+using System.IO.Pipes;
+using System.Linq;
+using biz.bd2.Models;
 
 namespace api.rebel_wings.Controllers;
 /// <summary>
@@ -242,6 +246,77 @@ public class DashboardController : ControllerBase
         
         return StatusCode(200, response);
     }
+
+    [HttpGet("performance-regionalD/{city:int}/{branch:int}")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public ActionResult GetPerformanceRegionalD(int city, int branch, [FromQuery] DateTime initDate, [FromQuery] DateTime endDate)
+    {
+        var response = new ApiResponse<List<MermasDto>>();
+        var mermasbd1 = new List<biz.bd1.Models.Mermas>();
+        var mermasbd2 = new List<biz.bd2.Models.Mermas>();
+        try
+        {
+            switch (city)
+            {
+                case (1):
+                    //DB2
+                   mermasbd2 = _mapper.Map<List<biz.bd2.Models.Mermas>>(
+                        _stockDB2Repository.GetMermas(branch, initDate.AbsoluteStart(), endDate.AbsoluteEnd()));
+                    break;
+                case (2):
+                    mermasbd1 = _stockDB1Repository.GetMermas(branch, initDate.AbsoluteStart(), endDate.AbsoluteEnd()); 
+                    break;
+            }
+            if (city == 2)
+            {
+                //var grouped = from merma in mermasbd1
+                //              group merma by merma.Fecha.Date;
+                //var gl = grouped.ToList();
+                var gl = mermasbd1
+            .GroupBy(merma => new { merma.Fecha, merma.Description, merma.UnitMeasure, merma.Price })
+            .Select(grupo => new biz.bd1.Models.Mermas
+            {
+                Fecha = grupo.Key.Fecha,
+                Description = grupo.Key.Description,
+                UnitMeasure = grupo.Key.UnitMeasure,
+                Unity = grupo.Sum(merma => merma.Unity),
+                Price = grupo.Key.Price,
+            })
+            .ToList();
+
+
+
+                return StatusCode(200, new { Success = true, Message = "Operation was success", Result = gl });
+            }
+            else 
+            {
+                var gl = mermasbd2
+            .GroupBy(merma => new { merma.Fecha, merma.Description, merma.UnitMeasure, merma.Price })
+            .Select(grupo => new biz.bd2.Models.Mermas
+            {
+                Fecha = grupo.Key.Fecha,
+                Description = grupo.Key.Description,
+                UnitMeasure = grupo.Key.UnitMeasure,
+                Unity = grupo.Sum(merma => merma.Unity),
+                Price = grupo.Key.Price,
+            })
+            .ToList();
+
+                return StatusCode(200, new { Success = true, Message = "Operation was success", Result = gl });
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            response.Success = false;
+            response.Message = ex.ToString();
+            return StatusCode(500, new { Success = false,Message = ex.ToString()});
+        }
+    }
+
     /// <summary>
     /// Method GET:
     /// performance general

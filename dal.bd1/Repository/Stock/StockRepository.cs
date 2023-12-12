@@ -10,6 +10,7 @@ using biz.bd1.Entities;
 using biz.bd1.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using System.Security.Cryptography;
 
 namespace dal.bd1.Repository.Stock
 {
@@ -508,10 +509,12 @@ namespace dal.bd1.Repository.Stock
                     Description = articulo1.Descripcion,
                     Price = moviment.Precio.Value,
                     Unity = moviment.Unidades.Value,
-                    UnitMeasure = articulo1.Unidadmedida
+                    UnitMeasure = articulo1.Unidadmedida,
+                    Fecha = (DateTime)moviment.Fecha
                 };
             return mermas.ToList();
         }
+
         public List<Reporte> GetReporte(DateTime Date)
         {
             List<Reporte> reportes = new List<Reporte>();
