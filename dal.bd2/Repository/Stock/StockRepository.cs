@@ -1114,6 +1114,7 @@ namespace dal.bd2.Repository.Stock
                 repp.Total = (double)reader["TOTAL"];
                 repp.Mes = (string)reader["MES"];
                 repp.Marca = (string)reader["MARCA"];
+                repp.Nom = (string)reader["NOM"];
                 reportes.Add(repp);
             }
             connection.Close();

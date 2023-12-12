@@ -36,7 +36,7 @@ public class AppsDto
     public double Total { get; set; }
     public string Mes { get; set; }
     public string Marca { get; set; }
-
+    public string Nom { get; set; }
 }
 
 public class SucursalesFrontDto
