@@ -184,8 +184,8 @@ namespace api.rebel_wings.Jobs
         static void EnviarCorreo(string bodymail)
         {
             // Configurar la información de la cuenta de Gmail
-            string correoRemitente = "arturo.m@operamx.com";
-            string contraseña = "C-Opera-AMH151298"; 
+            string correoRemitente = "it_token@operamx.com";
+            string contraseña = "M@5TERKEY"; 
 
             // Configurar la información del destinatario
            // string correoDestinatario = "developeramh@outlook.com";
