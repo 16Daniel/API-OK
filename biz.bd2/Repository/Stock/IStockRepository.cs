@@ -20,6 +20,7 @@ namespace biz.bd2.Repository.Stock
         List<biz.bd2.Models.Reporte> GetReporte(DateTime Date);
         List<biz.bd2.Models.Reporte> GetReporteV(DateTime Date);
         List<biz.bd2.Models.Apps> GetReporteApps(DateTime DateI, DateTime DateF);
+        List<biz.bd2.Models.Checadas> GetReporteChecadas(DateTime DateI, DateTime DateF);
         List<biz.bd2.Models.SucursalesFront> GetSucursalesF();
         List<biz.bd2.Models.Vendedor> GetVentaVendedor(DateTime initDate, DateTime endDate);
         List<biz.bd2.Models.Filtro> GetVentaVendedorFiltro(DateTime initDate, DateTime endDate);

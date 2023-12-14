@@ -695,6 +695,35 @@ public class DashboardController : ControllerBase
         return StatusCode(200, response);
     }
 
+    [HttpGet("performance-reporte-regional")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public ActionResult<ApiResponse<List<ChecadasDto>>> GetPerformanceReporteRegionales([FromQuery] DateTime initDate, [FromQuery] DateTime endDate)
+    {
+        var response = new ApiResponse<List<ChecadasDto>>();
+        try
+        {
+
+            //DB2
+            response.Result = _mapper.Map<List<ChecadasDto>>(
+                _stockDB2Repository.GetReporteChecadas(initDate.AbsoluteStart(), endDate.AbsoluteStart()));
+
+
+            response.Success = true;
+            response.Message = "Operation was success";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            response.Success = false;
+            response.Message = ex.ToString();
+            return StatusCode(500, response);
+        }
+
+        return StatusCode(200, response);
+    }
+
     [HttpGet("Sucursales/{city:int}")]
     public ActionResult<ApiResponse<List<SucursalesFrontDto>>> GetSucursales(int city)
     {

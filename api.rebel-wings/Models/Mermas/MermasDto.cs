@@ -56,6 +56,13 @@ public class RankingDto
 
 }
 
+public class ChecadasDto
+{
+    public DateTime Fecha { get; set; }
+    public string Reloj { get; set; }
+    public string Empleado { get; set; }
+}
+
 public class VendedorDto
 {
     public string Sucursal { get; set; }
