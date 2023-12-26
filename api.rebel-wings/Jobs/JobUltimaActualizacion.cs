@@ -38,7 +38,7 @@ namespace api.rebel_wings.Jobs
                     Process();
                     _nextRun = _schedule.GetNextOccurrence(DateTime.Now);
                 }
-                await Task.Delay(60000, stoppingToken);
+                await Task.Delay(5000, stoppingToken);
             }
             while (!stoppingToken.IsCancellationRequested);
         }
@@ -95,6 +95,7 @@ namespace api.rebel_wings.Jobs
             catch (Exception ex2)
             {
                 throw new Exception(ex2.Message);
+
             }
 
         }
