@@ -18,7 +18,7 @@ namespace api.rebel_wings.Jobs
         private readonly IServiceScopeFactory _scopeFactory;
         private CrontabSchedule _schedule;
         private DateTime _nextRun;
-        private string Schedule => "0 7 * * *";
+        private string Schedule => "1 7 * * *";
 
         public JobUltimaActualizacion(IServiceScopeFactory serviceScopeFactory) 
         {
@@ -94,8 +94,33 @@ namespace api.rebel_wings.Jobs
             }
             catch (Exception ex2)
             {
-                throw new Exception(ex2.Message);
+                // Configurar la información de la cuenta de Gmail
+                string correoRemitente = "it_token@operamx.com";
+                string contraseña = "M@5TERKEY";
 
+                // Configurar la información del destinatario
+                // string correoDestinatario = "developeramh@outlook.com";
+                string correoDestinatario = "arturo.m@operamx.com";
+                string asunto = "Error al enviar correo de notificacion";
+
+                // Configurar el cliente SMTP de Gmail
+                SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential(correoRemitente, contraseña),
+                    EnableSsl = true,
+                };
+
+                // Crear el mensaje de correo
+                MailMessage mensaje = new MailMessage(correoRemitente, correoDestinatario, asunto, string.Empty)
+                {
+                    IsBodyHtml = true,
+                    Body = "Error al enviar el correo de notificación: "+ex2.Message,
+                    SubjectEncoding = Encoding.UTF8,
+                    BodyEncoding = Encoding.UTF8
+                };
+
+                clienteSmtp.Send(mensaje);
             }
 
         }
