@@ -480,6 +480,7 @@ namespace dal.bd2.Repository.Stock
             {
                 Reporte repp = new Reporte();
                 repp.cod = (string)reader["COD"];
+                repp.Region = (string)reader["REGION"];
                 repp.Sucursal = (string)reader["SUCURSAL"];
                 repp.Articulo = (string)reader["ARTICULO"];
                 repp.Seccion = (string)reader["SECCION"];
@@ -857,6 +858,7 @@ namespace dal.bd2.Repository.Stock
             while (reader.Read()) {
                 Reporte repp = new Reporte();
                 repp.cod = (string)reader["COD"];
+                repp.Region = (string)reader["REGION"];
                 repp.Sucursal = (string)reader["SUCURSAL"];
                 repp.Articulo = (string)reader["ARTICULO"];
                 repp.Seccion = (string)reader["SECCION"];
@@ -1106,8 +1108,8 @@ namespace dal.bd2.Repository.Stock
             while (reader.Read())
             {
                 Apps repp = new Apps();
-                repp.Reg = (string)reader["COD"];
-                repp.Cod = (string)reader["REG"];
+                repp.Reg = (string)reader["REG"];
+                repp.Cod = (string)reader["COD"];
                 repp.Sucursal = (string)reader["SUCURSAL"];
                 repp.Codcliente = (int)reader["CODCLIENTE"];
                 repp.App = (string)reader["APP"];

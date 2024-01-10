@@ -11,6 +11,7 @@ public class Mermas
 public class Reporte
 {
     public string cod { get; set; }
+    public string Region { get; set; }
     public string Sucursal { get; set; }
     public string Articulo { get; set; }
     public string InvAyer { get; set; }
