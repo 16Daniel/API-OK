@@ -70,50 +70,12 @@ namespace api.rebel_wings.Jobs
             DateTime primerDiaMesAnterior;
             DateTime ultimoDiaMesAnterior;
 
-            UserDto all = new UserDto();
-            all.Id = -1;
-            all.Name = "TODOS";
-            List<UserDto> regionalesQro = getRegionales(2);
-            regionalesQro.Add(all);
-            List<UserDto> regionalesmx = getRegionales(1);
-            regionalesmx.Add(all);  
+            List<UserDto> regionales = getRegionales(1); 
 
                     primerDiaMesAnterior = new DateTime(now.Year, now.Month, 1);
                     ultimoDiaMesAnterior = new DateTime(now.Year, now.Month, now.Day);
 
-                    foreach (UserDto regional in regionalesQro)
-                    {
-                        var reporte = obtenerReporte(2, regional.Id, primerDiaMesAnterior, ultimoDiaMesAnterior);
-                        if (reporte == null)
-                        {
-
-                            var response = genrarReporte(2, regional.Id, primerDiaMesAnterior, ultimoDiaMesAnterior);
-                            jsondata = JsonConvert.SerializeObject(response);
-
-                            try
-                            {
-                                using IServiceScope scope2 = _scopeFactory.CreateScope();
-                                _context = scope2.ServiceProvider.GetService<Db_Rebel_WingsContext>();
-                                SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
-                                SqlCommand cmd = connection.CreateCommand();
-                                connection.Open();
-                                cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                                cmd.CommandText = "insertar_reporte_mensual_temp";
-                                cmd.Parameters.Add("@city", System.Data.SqlDbType.Int).Value = 2;
-                                cmd.Parameters.Add("@regional", System.Data.SqlDbType.Int).Value = regional.Id;
-                                cmd.Parameters.Add("@startdate", System.Data.SqlDbType.DateTime).Value = primerDiaMesAnterior;
-                                cmd.Parameters.Add("@enddate", System.Data.SqlDbType.DateTime).Value = ultimoDiaMesAnterior;
-                                cmd.Parameters.Add("@json", System.Data.SqlDbType.NVarChar).Value = jsondata;
-                                cmd.CommandTimeout = 120;
-                                cmd.ExecuteNonQuery();
-                                connection.Close();
-                            }
-                            catch (Exception ex)
-                            { }
-                        }
-                    }
-
-                    foreach (UserDto regional in regionalesmx)
+                    foreach (UserDto regional in regionales)
                     {
                         var reporte = obtenerReporte(1, regional.Id, primerDiaMesAnterior, ultimoDiaMesAnterior);
                         if (reporte == null)
@@ -135,9 +97,10 @@ namespace api.rebel_wings.Jobs
                                 cmd.Parameters.Add("@regional", System.Data.SqlDbType.Int).Value = regional.Id;
                                 cmd.Parameters.Add("@startdate", System.Data.SqlDbType.DateTime).Value = primerDiaMesAnterior;
                                 cmd.Parameters.Add("@enddate", System.Data.SqlDbType.DateTime).Value = ultimoDiaMesAnterior;
-                                cmd.Parameters.Add("@json", System.Data.SqlDbType.NVarChar).Value =jsondata;
+                                cmd.Parameters.Add("@json", System.Data.SqlDbType.NVarChar).Value = jsondata;
                                 cmd.CommandTimeout = 120;
-                                cmd.ExecuteNonQuery();                           
+                                cmd.ExecuteNonQuery();
+                                connection.Close();
                             }
                             catch (Exception ex)
                             { }
