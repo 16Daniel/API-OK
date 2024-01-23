@@ -444,7 +444,7 @@ namespace api.rebel_wings.Controllers
                             DataBase = dataBase,
                             Branch = sucursal,//_iRHTrabRepository.GetBranchId(userData.ClabTrab.Value),
                             BranchName = sucursalName,//userData.BranchId.HasValue ? _iRHTrabRepository.GetBranchNameById(userData.BranchId.Value) : "",
-                            BranchId = userData.SucursalId, //userData.BranchId
+                            BranchId = userData.BranchId, //userData.BranchId
                             Branchs = branches.Any() ? branches.Select(s=>s.BranchId).ToArray() : null
                         };
                         response.Result = userReturnDto;

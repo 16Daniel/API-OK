@@ -21,13 +21,13 @@ namespace dal.fortia.Repository.RH
             DateTime date = DateTime.Now.AddDays(-1);
             var list = (from t in _context.RhTrabs 
                         join s in _context.RhRegentsals on t.ClaTrab equals s.ClaTrab
-                        join r in _context.RhRelojs on s.ClaReloj equals r.ClaReloj
+                        join r in _context.RelojCatRelojs on s.ClaReloj equals r.ClaReloj
                         join p in _context.RhPuestos on t.ClaPuesto equals p.ClaPuesto
                         join ct in _context.RhTurnos on t.ClaTurno equals ct.ClaTurno
                         where r.ClaReloj == branch && s.FechaEntsal > date
                         select new AttendanceList
                         {
-                            FullName = $"{t.NomTrab} {t.ApPaterno} {t.ApPaterno}",
+                            FullName = $"{t.NomTrab}"+"  "+$"{t.ApPaterno}"+"  "+$"{t.ApPaterno}",
                             Id = t.ClaTrab,
                             JobTitle = p.NomPuesto,
                             Workshift = GetWorkshift(ct.HoraEnt1.GetValueOrDefault()),
@@ -38,10 +38,9 @@ namespace dal.fortia.Repository.RH
 
         public List<TransferList> GetBranchList()
         {
-            var branchList = _context.RhRelojs.Select(s => new TransferList()
+            var branchList = _context.RelojCatRelojs.Select(s => new TransferList()
             {
                 Name = s.NomReloj,
-                Description = s.Mensaje,
                 BranchId = s.ClaReloj,
             }).ToList();
             return branchList;
@@ -74,7 +73,7 @@ namespace dal.fortia.Repository.RH
 
         public string GetBranchNameById(int branchId)
         {
-            string s = _context.RhRelojs.First(f => f.ClaReloj == branchId).NomReloj;
+            string s = _context.RelojCatRelojs.First(f => f.ClaReloj == branchId).NomReloj;
 
             return s;
         }
@@ -88,7 +87,7 @@ namespace dal.fortia.Repository.RH
         public string GetBranchName(int clab_trab)
         {
             int a = _context.RhRegentsals.Where(x => x.ClaTrab == clab_trab).OrderByDescending(o => o.FechaEntsal).First().ClaReloj;
-            string s = _context.RhRelojs.First(f => f.ClaReloj == a).NomReloj;
+            string s = _context.RelojCatRelojs.First(f => f.ClaReloj == a).NomReloj;
 
             return s;
         }
