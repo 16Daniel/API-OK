@@ -17,6 +17,6 @@ namespace biz.bd2.Models
         public double? Stock1 { get; set; }
         public DateTime? Ultfecha { get; set; }
         public string RegularizaSemanal { get; set; }
-        public int Orden { get; set; }
+        public int? Orden { get; set; }
     }
 }

@@ -399,7 +399,7 @@ namespace dal.bd2.Repository.Stock
                 }
 
                 DateTime FechVC = diAsignado.Date.AddHours(2);
-
+                
                 biz.bd2.Entities.Moviment _moviment = new biz.bd2.Entities.Moviment();
                 _moviment.Codalmacenorigen = codAlmacen;
                 _moviment.Codalmacendestino = "";

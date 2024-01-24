@@ -38,7 +38,7 @@ namespace api.rebel_wings.Jobs
                 var nextrun = _schedule.GetNextOccurrence(now);
                 if (now > _nextRun)
                 {
-                   Process();
+                   //Process();
                     _nextRun = _schedule.GetNextOccurrence(DateTime.Now);
                 }
                 await Task.Delay(1000, stoppingToken);
