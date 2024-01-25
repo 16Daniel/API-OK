@@ -109,6 +109,8 @@ namespace dal.bd2.Repository.Stock
                         Unidadessat = stk.Unidadessat,
                         Unidadmedida = stk.UnidadMedida,
                         RegularizaSemanal = stk.RegularizaSemanal,
+                        Orden = stk.Orden,
+                        
                     })
                     .Join(_context.Articulos1,
                     art => art.Codarticulo,
@@ -122,6 +124,7 @@ namespace dal.bd2.Repository.Stock
                         Unidadessat = art.Unidadessat,
                         Unidadmedida = stk.Unidadmedida,
                         RegularizaSemanal = art.RegularizaSemanal,
+                        Orden = art.Orden,
                     })
                     .Where(s => s.Codalmacen == serie && s.RegularizaSemanal == "T").ToList();
 

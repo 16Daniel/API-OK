@@ -153,6 +153,7 @@ namespace api.rebel_wings.Controllers
         [HttpGet("GetStockV", Name = "GetStockV")]
         public ActionResult<ApiResponse<List<StockDto>>> GetStockV(int id_sucursal, string dataBase)
         {
+            dataBase = "DB2";
             var response = new ApiResponse<List<StockDto>>();
 
             try

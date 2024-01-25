@@ -18,7 +18,7 @@ namespace api.rebel_wings.Jobs
         private readonly IServiceScopeFactory _scopeFactory;
         private CrontabSchedule _schedule;
         private DateTime _nextRun;
-        private string Schedule => "1 7 * * *";
+        private string Schedule => "0 7 * * *";
 
         public JobUltimaActualizacion(IServiceScopeFactory serviceScopeFactory) 
         {
@@ -35,15 +35,15 @@ namespace api.rebel_wings.Jobs
                 var nextrun = _schedule.GetNextOccurrence(now);
                 if (now > _nextRun)
                 {
-                    Process();
+                     Process();
                     _nextRun = _schedule.GetNextOccurrence(DateTime.Now);
                 }
-                await Task.Delay(5000, stoppingToken);
+                await Task.Delay(1000, stoppingToken);
             }
             while (!stoppingToken.IsCancellationRequested);
         }
 
-        private void Process()
+        public async void Process()
         {
             string bodytec = "";
             string body25p = ""; 
@@ -210,8 +210,8 @@ namespace api.rebel_wings.Jobs
         static void EnviarCorreo(string bodymail)
         {
             // Configurar la información de la cuenta de Gmail
-            string correoRemitente = "it_token@operamx.com";
-            string contraseña = "M@5TERKEY"; 
+            string correoRemitente = "gilberto.r@operamx.com";
+            string contraseña = "Gil19315"; 
 
             // Configurar la información del destinatario
            // string correoDestinatario = "developeramh@outlook.com";

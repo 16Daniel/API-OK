@@ -55,7 +55,7 @@ namespace api.rebel_wings.Jobs
                     Process();
                     _nextRun = _schedule.GetNextOccurrence(DateTime.Now);
                 }
-                await System.Threading.Tasks.Task.Delay(5000, stoppingToken); //5 seconds delay
+                await System.Threading.Tasks.Task.Delay(1000, stoppingToken); //5 seconds delay
             }
             while (!stoppingToken.IsCancellationRequested);
         }

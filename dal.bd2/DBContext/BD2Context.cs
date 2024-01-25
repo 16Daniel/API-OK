@@ -5290,6 +5290,10 @@ namespace dal.bd2.DBContext
                 .HasMaxLength(1)
                 .IsFixedLength();
 
+                entity.Property(e => e.Orden)
+                .HasColumnName("ORDEN_INVENTARIO_APP");
+
+
                 entity.HasOne(d => d.CodarticuloNavigation)
                     .WithOne(p => p.Articuloscamposlibre)
                     .HasForeignKey<Articuloscamposlibre>(d => d.Codarticulo)

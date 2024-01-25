@@ -169,6 +169,7 @@ builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddHostedService<JobReporteMensualTemp>();
 builder.Services.AddHostedService<JobUltimaActualizacion>();
+builder.Services.AddHostedService<JobNotificacionInventario>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();
