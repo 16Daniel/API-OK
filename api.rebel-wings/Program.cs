@@ -170,6 +170,7 @@ builder.Services.AddScoped<ValidationFilterAttribute>();
 builder.Services.AddHostedService<JobReporteMensualTemp>();
 builder.Services.AddHostedService<JobUltimaActualizacion>();
 builder.Services.AddHostedService<JobNotificacionInventario>();
+builder.Services.AddHostedService<JobNotificacionInventarioV>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();

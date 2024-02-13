@@ -15,15 +15,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace api.rebel_wings.Jobs
 {
-    public class JobNotificacionInventario : BackgroundService
+    public class JobNotificacionInventarioV : BackgroundService
     {
         protected BD2Context _contextdb1;
         private readonly IServiceScopeFactory _scopeFactory;
         private CrontabSchedule _schedule;
         private DateTime _nextRun;
-        private string Schedule => "00 13 * * *";
+        private string Schedule => "00 05 * * *";
 
-        public JobNotificacionInventario(IServiceScopeFactory serviceScopeFactory)
+        public JobNotificacionInventarioV(IServiceScopeFactory serviceScopeFactory)
         {
             _scopeFactory = serviceScopeFactory;
             _schedule = CrontabSchedule.Parse(Schedule, new CrontabSchedule.ParseOptions { IncludingSeconds = false });
@@ -38,7 +38,7 @@ namespace api.rebel_wings.Jobs
                 var nextrun = _schedule.GetNextOccurrence(now);
                 if (now > _nextRun)
                 {
-                   Process();
+                    Process();
                     _nextRun = _schedule.GetNextOccurrence(DateTime.Now);
                 }
                 await Task.Delay(1000, stoppingToken);
@@ -48,9 +48,7 @@ namespace api.rebel_wings.Jobs
 
         public async void Process()
         {
-            string bodytab1 = "";
-            string bodytab2 = "";
-            string bodytab3 = "";
+
             string bodytab4 = "";
             string bodytab5 = "";
             Boolean enviaremail = false;
@@ -79,44 +77,32 @@ namespace api.rebel_wings.Jobs
                 conn.Close();
                 conn.Dispose();
 
-                foreach (DataRow row in dt.Tables[0].Rows)
+
+                foreach (DataRow row in dt.Tables[3].Rows)
                 {
-                    if (dt.Tables[0].Rows.Count > 0) { enviaremail = true; }
-                    bodytab1 += "<tr>";
-                    bodytab1 += "<td>" + row[1] + "</td>";
-                    bodytab1 += "<td>" + row[2] + "</td>";
-                    bodytab1 += "<td>" + row[3] + "</td>";
-                    bodytab1 += "<td>" + row[4] + "</td>";
-                    bodytab1 += "</tr>";
+                    if (dt.Tables[3].Rows.Count > 0) { enviaremail = true; }
+                    bodytab4 += "<tr>";
+                    bodytab4 += "<td>" + row[1] + "</td>";
+                    bodytab4 += "<td>" + row[2] + "</td>";
+                    bodytab4 += "<td>" + row[3] + "</td>";
+                    bodytab4 += "<td>" + row[4] + "</td>";
+                    bodytab4 += "</tr>";
                 }
 
-                foreach (DataRow row in dt.Tables[1].Rows)
+                foreach (DataRow row in dt.Tables[4].Rows)
                 {
-                    if (dt.Tables[1].Rows.Count > 0) { enviaremail = true; }
-                    bodytab2 += "<tr>";
-                    bodytab2 += "<td>" + row[1] + "</td>";
-                    bodytab2 += "<td>" + row[2] + "</td>";
-                    bodytab2 += "<td>" + row[3] + "</td>";
-                    bodytab2 += "<td>" + row[4] + "</td>";
-                    bodytab2 += "</tr>";
-                }
-
-                foreach (DataRow row in dt.Tables[2].Rows)
-                {
-                    if (dt.Tables[2].Rows.Count > 0) { enviaremail = true; }
-                    bodytab3 += "<tr>";
-                    bodytab3 += "<td>" + row[1] + "</td>";
-                    bodytab3 += "<td>" + row[2] + "</td>";
-                    bodytab3 += "<td>" + row[3] + "</td>";
-                    bodytab3 += "<td>" + row[4] + "</td>";
-                    bodytab3 += "<td>" + row[5] + "</td>";
-                    bodytab3 += "<td>" + row[6].ToString().Substring(11, 8) + "</td>";
-                    bodytab3 += "</tr>";
+                    if (dt.Tables[4].Rows.Count > 0) { enviaremail = true; }
+                    bodytab5 += "<tr>";
+                    bodytab5 += "<td>" + row[1] + "</td>";
+                    bodytab5 += "<td>" + row[2] + "</td>";
+                    bodytab5 += "<td>" + row[3] + "</td>";
+                    bodytab5 += "<td>" + row[4] + "</td>";
+                    bodytab5 += "</tr>";
                 }
 
 
-                string bodymail = getBody(bodytab1, bodytab2, bodytab3);
-                if (enviaremail) { EnviarCorreo(bodymail); } 
+                string bodymail = getBody( bodytab4, bodytab5);
+                if (enviaremail) { EnviarCorreo(bodymail); }
             }
             catch (SqlException ex)
             {
@@ -155,7 +141,7 @@ namespace api.rebel_wings.Jobs
 
         }
 
-        public string getBody(string bodytab1,string bodytab2,string bodytab3)
+        public string getBody(string bodytab4, string bodytab5)
         {
             string template = @"<!DOCTYPE html>
 <html lang=""es"">
@@ -200,7 +186,7 @@ namespace api.rebel_wings.Jobs
   <div class=""container"">
     <h1 style=""color: rgb(255, 166, 0); text-align: center;"">*W A R N I N G*</h1>
 
-    <H4 style=""background-color: #ddd; padding: 5px; text-align: center; border-radius: 5px;"">SUCURSALES SIN CAPTURA DE INVENTARIO O CON CAPTURA PARCIAL TURNO MATUTINO</H4>
+    <H4 style=""background-color: #ddd; padding: 5px; text-align: center; border-radius: 5px;"">SUCURSALES SIN CAPTURA DE INVENTARIO O CON CAPTURA PARCIAL TURNO VESPERTINO</H4>
     <table align=""center"">
       <thead style=""background-color: rgb(255, 230, 0);"">
           <tr>
@@ -211,11 +197,11 @@ namespace api.rebel_wings.Jobs
             </tr>         
       </thead>
       <tbody>
-        --bodytab1
+        --bodytab4
       </tbody>
     </table>
 
-    <h4 style=""background-color:#ddd;padding:5px;text-align:center;border-radius:5px"">ARTÍCULOS SIN CAPTURA DE INVENTARIO TURNO MATUTINO</h4>
+    <h4 style=""background-color:#ddd;padding:5px;text-align:center;border-radius:5px"">ARTÍCULOS SIN CAPTURA DE INVENTARIO TURNO VESPERTINO</h4>
     <table align=""center"">
       <thead style=""background-color:rgb(255,230,0)"">
           <tr>
@@ -226,25 +212,7 @@ namespace api.rebel_wings.Jobs
             </tr>         
       </thead>
       <tbody>
-        --bodytab2
-      </tbody>
-    </table>
-
-
-    <H4 style=""background-color: #ddd; padding: 5px; text-align: center; border-radius: 5px;"">ARTÍCULOS CAPTURADOS DESPUÉS DE LA HORA MÁXIMA TURNO MATUTINO</H4>
-    <table align=""center"">
-      <thead style=""background-color: rgb(255, 230, 0);"">
-        <tr>
-          <th>REGIÓN</th>
-          <th>SUCURSAL</th>
-          <th>ARTÍCULO</th>
-          <th>SECCIÓN</th>
-          <th>INVENTARIO</th>
-          <th>CAPTURA</th>
-          </tr>      
-      </thead>
-      <tbody>
-        --bodytab3
+        --bodytab5
       </tbody>
     </table>
 
@@ -252,9 +220,9 @@ namespace api.rebel_wings.Jobs
 </body>
 </html>";
 
-            template = template.Replace("--bodytab1", bodytab1);
-            template = template.Replace("--bodytab2", bodytab2);
-            template = template.Replace("--bodytab3", bodytab3);
+           
+            template = template.Replace("--bodytab4", bodytab4);
+            template = template.Replace("--bodytab5", bodytab5);
             return template;
         }
 
@@ -271,7 +239,7 @@ namespace api.rebel_wings.Jobs
             // Configurar la información del destinatario
             // string correoDestinatario = "developeramh@outlook.com";
             string correoDestinatario = "arturo.m@operamx.com";
-            string asunto = "NOTIFICACIÓN CARGA DE INVENTARIOS MATUTINO";
+            string asunto = "NOTIFICACIÓN CARGA DE INVENTARIOS VESPERTINO";
 
             // Configurar el cliente SMTP de Gmail
             SmtpClient clienteSmtp = new SmtpClient("smtp.gmail.com")

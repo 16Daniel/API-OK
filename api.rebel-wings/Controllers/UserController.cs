@@ -7,6 +7,8 @@ using biz.rebel_wings.Entities;
 using biz.rebel_wings.Paged;
 using biz.rebel_wings.Repository.User;
 using biz.rebel_wings.Services.Logger;
+using dal.bd2.DBContext;
+using dal.rebel_wings.DBContext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -23,13 +25,14 @@ namespace api.rebel_wings.Controllers
         private readonly IRHTrabRepository _iRHTrabRepository;
         private readonly biz.bd1.Repository.Sucursal.ISucursalRepository _sucursalDB1Repository;
         private readonly biz.bd2.Repository.Sucursal.ISucursalRepository _sucursalDB2Repository;
-
+        public Db_Rebel_WingsContext _context;
         public UserController(IUserRepository userRepository,
             IMapper mapper,
             ILoggerManager logger,
             IRHTrabRepository rHTrabRepository,
             biz.bd1.Repository.Sucursal.ISucursalRepository sucursalDB1Repository,
-            biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository)
+            biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository,
+            Db_Rebel_WingsContext context)
         {
             _userRepository = userRepository;
             _mapper= mapper;
@@ -37,6 +40,7 @@ namespace api.rebel_wings.Controllers
             _iRHTrabRepository = rHTrabRepository;
             _sucursalDB1Repository = sucursalDB1Repository;
             _sucursalDB2Repository = sucursalDB2Repository;
+            _context = context;
         }
 
         [HttpGet]
@@ -554,6 +558,40 @@ namespace api.rebel_wings.Controllers
             }
 
             return Ok(response);
+        }
+
+
+        [HttpGet]
+        [Route("getRoles")]
+        [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
+        public async Task<ActionResult> GetRoles()
+        {
+            try
+            {
+                var repository = _context.CatRoles.Select(s => new
+                {
+                    id = s.Id,
+                    descripcion = s.Description,
+                    
+                }).ToList();
+
+                return StatusCode(200, new
+                {
+                    Result = repository,
+                    Success = true,
+                    Message = "Consult was success",
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = ex.ToString(),
+                });
+            }
         }
 
     }
