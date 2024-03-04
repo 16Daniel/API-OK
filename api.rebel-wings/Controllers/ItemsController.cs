@@ -2,6 +2,7 @@
 using api.rebel_wings.Models.ApiResponse;
 using api.rebel_wings.Models.Articulos;
 using AutoMapper;
+using biz.bd1.Entities;
 using biz.rebel_wings.Services.Logger;
 using dal.bd2.DBContext;
 using dal.rebel_wings.DBContext;
@@ -11,8 +12,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Data;
+using System.Dynamic;
+using System.Runtime.Intrinsics.Arm;
 using System.Web.Helpers;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
@@ -271,6 +275,37 @@ namespace api.rebel_wings.Controllers
             try
             {
                 var repository = _contextdb2.Marcas.Select(s => new
+                {
+                    codmarca = s.Codmarca,
+                    descripcion = s.Descripcion
+                }).ToList();
+
+                return StatusCode(200, new
+                {
+                    Result = repository,
+                    Success = true,
+                    Message = "Consult was success",
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+
+                return StatusCode(500, new
+                {
+                    Success = false,
+                    Message = ex.ToString(),
+                });
+            }
+        }
+
+        [HttpGet("getNameMarca/{idm}")]
+        [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
+        public async Task<ActionResult> Getnamemarca(int idm)
+        {
+            try
+            {
+                var repository = _contextdb2.Marcas.Where(m=> m.Codmarca == idm).Select(s => new
                 {
                     codmarca = s.Codmarca,
                     descripcion = s.Descripcion
@@ -721,7 +756,7 @@ namespace api.rebel_wings.Controllers
         {
             try
             {
-                List<CambiosModel> listacambios = new List<CambiosModel>();
+                List<CambiosModelH> listacambios = new List<CambiosModelH>();
 
                 using (SqlConnection connection = (SqlConnection)_contextdb2.Database.GetDbConnection())
                 {
@@ -735,7 +770,6 @@ namespace api.rebel_wings.Controllers
                         {
                             while (reader.Read())
                             {
-                                CambiosModel model = new CambiosModel();
                                 // Accede a los datos de cada fila
                                 int id = reader.GetInt32(reader.GetOrdinal("ID"));
                                 int idu = reader.GetInt32(reader.GetOrdinal("IDU"));
@@ -745,28 +779,285 @@ namespace api.rebel_wings.Controllers
                                 bool activo = reader.GetBoolean(reader.GetOrdinal("ACTIVO"));
                                 string accion = reader.GetString(reader.GetOrdinal("ACCION"));
 
-                                model.id = id;
-                                model.idu = idu;
-                                model.accion = accion;
-                                model.fecha = fecha;
-                                model.activo = activo;
-                                model.justificacion = justificacion;
-                                model.jsondata = jsonData;
+                                dynamic objdata = JsonConvert.DeserializeObject<ExpandoObject>(jsonData);
+                                string marca = ""; 
+                                try {
 
-                                var usuario = _context.Users.Find(idu);
-                                model.username = usuario == null ? "" : usuario.Name + " " + usuario.LastName;
-                                listacambios.Add(model);
+                                    int idm = int.Parse(objdata.newdata.marca);
+                                    var repository = _contextdb2.Marcas.Where(m => m.Codmarca == idm).Select(s => new
+                                    {
+                                        codmarca = s.Codmarca,
+                                        descripcion = s.Descripcion
+                                    }).ToList();
+                                    marca = repository[0].descripcion; 
+                                }
+                                catch(Exception ex) 
+                                {
+                                   
+                                }
+                                
+
+                                //detectar cuantos cambios se realizaron
+                                List<cambiosporRegistro> cambiosxr = new List<cambiosporRegistro>();
+                                if (accion.Contains("GENERALES"))
+                                {
+                                    if (objdata.data.descripcion != objdata.newdata.descripcion)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "DESCRIPCIÓN",
+                                            valorantes = objdata.data.descripcion,
+                                            valordespues = objdata.newdata.descripcion
+                                        });
+                                    }
+
+                                    if (objdata.data.departamento != objdata.newdata.departamento)
+                                    {
+                                        int numda = int.Parse(objdata.data.departamento);
+                                        int numdd = int.Parse(objdata.newdata.departamento);
+                                        var departamentoantes = _contextdb2.Departamentos.Where(d => d.Numdpto == numda).FirstOrDefault();
+                                        var departamentodespues = _contextdb2.Departamentos.Where(d => d.Numdpto == numdd).FirstOrDefault();
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "DEPARTAMENTO",
+                                            valorantes = departamentoantes.Descripcion,
+                                            valordespues = departamentodespues.Descripcion,
+                                        });
+                                    }
+
+                                    if (objdata.data.seccion != objdata.newdata.seccion)
+                                    {
+                                        int numa = int.Parse(objdata.data.seccion);
+                                        int numd = int.Parse(objdata.newdata.seccion);
+                                        var seccionantes = _contextdb2.Secciones.Where(d => d.Numseccion == numa).FirstOrDefault();
+                                        var secciondespues = _contextdb2.Secciones.Where(d => d.Numseccion == numd).FirstOrDefault();
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "SECCIÓN",
+                                            valorantes = seccionantes.Descripcion,
+                                            valordespues = secciondespues.Descripcion
+                                        });
+                                    }
+
+                                    if (objdata.data.marca != objdata.newdata.marca)
+                                    {
+                                        int numa = int.Parse(objdata.data.marca);
+                                        int numd = int.Parse(objdata.newdata.marca);
+                                        var marcaantes = _contextdb2.Marcas.Where(d => d.Codmarca == numa).FirstOrDefault();
+                                        var marcadespues = _contextdb2.Marcas.Where(d => d.Codmarca == numd).FirstOrDefault();
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "MARCA",
+                                            valorantes = marcaantes.Descripcion,
+                                            valordespues = marcadespues.Descripcion,
+                                        });
+                                    }
+
+                                    if (objdata.data.tipoImpuesto != objdata.newdata.tipoimpuesto)
+                                    {
+                                        int numa = int.Parse(objdata.data.tipoImpuesto);
+                                        int numd = int.Parse(objdata.newdata.tipoimpuesto);
+                                        var impuestoantes = _contextdb2.Impuestos.Where(d => d.Tipoiva == numa).FirstOrDefault();
+                                        var impuestodespues = _contextdb2.Impuestos.Where(d => d.Tipoiva == numd).FirstOrDefault();
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "IMPUESTO DE VENTA",
+                                            valorantes = impuestoantes.Descripcion,
+                                            valordespues = impuestodespues.Descripcion,
+                                        });
+                                    }
+
+                                    if (objdata.data.impuestoCompra != objdata.newdata.impuestocompra)
+                                    {
+                                        int numa = int.Parse(objdata.data.impuestoCompra);
+                                        int numd = int.Parse(objdata.newdata.impuestocompra);
+                                        var impuestoantes = _contextdb2.Impuestos.Where(d => d.Tipoiva == numa).FirstOrDefault();
+                                        var impuestodespues = _contextdb2.Impuestos.Where(d => d.Tipoiva == numd).FirstOrDefault();
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "IMPUESTO DE COMPRA",
+                                            valorantes = impuestoantes.Descripcion,
+                                            valordespues = impuestodespues.Descripcion,
+                                        });
+                                    }
+
+                                    Boolean usastock = (string)objdata.data.usaStock == "T" ? true : false;
+                                    if (usastock != (Boolean)objdata.newdata.usastock)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "EL ARTÍCULO USA STOCK",
+                                            valorantes = (string)objdata.data.usaStock == "T" ? "True" : "False",
+                                            valordespues = (Boolean)objdata.newdata.usastock ? "True" : "False",
+                                        });
+
+                                    }
+                                        Boolean udsenteras = (string)objdata.data.forzarUdsEntreras == "True"; 
+                                        if (udsenteras != (Boolean)objdata.newdata.udsenteras)
+                                        {
+                                            cambiosxr.Add(new cambiosporRegistro
+                                            {
+                                                campo = "SE VENDE EN UDS ENTERAS",
+                                                valorantes = (string)objdata.data.forzarUdsEntreras == "True" ? "True" : "False",
+                                                valordespues = (Boolean)objdata.newdata.udsenteras ? "True" : "False"
+                                            });
+                                        }
+
+                                        if (objdata.data.familia != objdata.newdata.familia)
+                                        {
+                                            int numa = int.Parse(objdata.data.familia);
+                                            int numd = int.Parse(objdata.newdata.familia);
+                                            var familiaantes = _contextdb2.Familias.Where(d => d.Numfamilia == numa).FirstOrDefault();
+                                            var familiadespues = _contextdb2.Familias.Where(d => d.Numfamilia == numd).FirstOrDefault();
+
+                                            cambiosxr.Add(new cambiosporRegistro
+                                            {
+                                                campo = "FAMILIA",
+                                                valorantes = familiaantes.Descripcion,
+                                                valordespues = familiadespues.Descripcion
+                                            });
+                                        }
+
+                                }
+
+
+
+                                if (accion.Contains("VENTA"))
+                                {
+                                    int idartv = (int)objdata.data.articulolin[0].codarticulo;
+                                    var articulo = _articulosRespositoryBD2.GetAll().Where(ar => ar.Codarticulo == idartv).Select(s => new
+                                    {
+                                        marca = s.Marca,
+                                    }).ToList();
+                                    if (articulo.Count>0) 
+                                    {
+                                        var objmarca = _contextdb2.Marcas.Where(m => m.Codmarca == articulo[0].marca).FirstOrDefault();
+                                        marca = objmarca == null ? "" : objmarca.Descripcion; 
+                                    }
+
+                                    if (objdata.data.articulolin[0].costemedio != objdata.newdata.costemedio)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "COSTE MEDIO",
+                                            valorantes = ""+objdata.data.articulolin[0].costemedio,
+                                            valordespues = "" + objdata.newdata.costemedio
+                                        });
+                                    }
+
+                                    if (objdata.data.articulolin[0].costestock != objdata.newdata.costestock)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "COSTE STOCK",
+                                            valorantes = "" + objdata.data.articulolin[0].costestock,
+                                            valordespues = "" + objdata.newdata.costestock
+                                        });
+                                    }
+
+                                    if (objdata.data.articulolin[0].ultimocoste != objdata.newdata.ultimocoste)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "ÚLTIMO COSTE",
+                                            valorantes = "" + objdata.data.articulolin[0].ultimocoste,
+                                            valordespues = "" + objdata.newdata.ultimocoste
+                                        });
+                                    }
+
+                                    if (objdata.data.articulolin[0].precioultcompra != objdata.newdata.preciocompra)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "PRECIO COMPRA",
+                                            valorantes = "" + objdata.data.articulolin[0].precioultcompra,
+                                            valordespues = "" + objdata.newdata.preciocompra
+                                        });
+                                    }
+
+                                    try
+                                    {
+                                        if (objdata.data.preciosvC[0].pneto != objdata.newdata.preciosv[0].pneto)
+                                        {
+                                            cambiosxr.Add(new cambiosporRegistro
+                                            {
+                                                campo = "WA COSTO SUCURSAL",
+                                                valorantes = "" + objdata.data.preciosvC[0].pneto,
+                                                valordespues = "" + objdata.newdata.preciosv[0].pneto
+                                            });
+                                        }
+                                    }
+                                    catch (Exception ex) { }
+
+
+                                }
+                                if (accion.Contains("PROVEEDORES"))
+                                {
+                                    int idartv = (int)objdata.data[0].codarticulo;
+                                    var articulo = _articulosRespositoryBD2.GetAll().Where(ar => ar.Codarticulo == idartv).Select(s => new
+                                    {
+                                        marca = s.Marca,
+                                    }).ToList();
+                                    if (articulo.Count > 0)
+                                    {
+                                        var objmarca = _contextdb2.Marcas.Where(m => m.Codmarca == articulo[0].marca).FirstOrDefault();
+                                        marca = objmarca == null ? "" : objmarca.Descripcion;
+                                    }
+
+                                    if (objdata.data[0].pneto != objdata.newdata.pbruto)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "PRECIO NETO",
+                                            valorantes = "" + objdata.data[0].pneto,
+                                            valordespues = "" + objdata.newdata.pbruto
+                                        });
+                                    }
+
+                                    if (objdata.data[0].pneto != objdata.newdata.pbruto)
+                                    {
+                                        cambiosxr.Add(new cambiosporRegistro
+                                        {
+                                            campo = "PRECIO BRUTO",
+                                            valorantes = "" + objdata.data[0].pneto,
+                                            valordespues = "" + objdata.newdata.pbruto
+                                        });
+                                    }
+                                }
+                                // generar modelo por cambio
+                                foreach (var item in cambiosxr)
+                                {
+                                    CambiosModelH model = new CambiosModelH();
+                                    model.id = id;
+                                    model.idu = idu;
+                                    model.accion = accion;
+                                    model.fecha = fecha;
+                                    model.activo = activo;
+                                    model.justificacion = justificacion;
+                                    model.jsondata = jsonData;
+                                    model.marca = marca;
+                                    var usuario = _context.Users.Find(idu);
+                                    model.username = usuario == null ? "" : usuario.Name + " " + usuario.LastName;
+                                    model.antes = item.valorantes;
+                                    model.despues = item.valordespues;
+                                    model.campo = item.campo;
+                                    listacambios.Add(model);
+
+                                }
+
+
+
 
                             }
                         }
                     }
+                    return StatusCode(200, new
+                    {
+                        Result = listacambios,
+                        Success = true,
+                        Message = "Consult was success",
+                    });
                 }
-                return StatusCode(200, new
-                {
-                    Result = listacambios,
-                    Success = true,
-                    Message = "Consult was success",
-                });
             }
             catch (Exception ex)
             {
@@ -779,8 +1070,7 @@ namespace api.rebel_wings.Controllers
                 });
             }
         }
-
-
+  
 
         [HttpPost]
         [Route("descartarCambios/{id}")]
@@ -1029,10 +1319,36 @@ namespace api.rebel_wings.Controllers
 
     }
 
+
+    public class CambiosModelH
+    {
+        public int id { get; set; }
+        public int idu { get; set; }
+        public string jsondata { get; set; }
+        public string justificacion { get; set; }
+        public string accion { get; set; }
+        public DateTime fecha { get; set; }
+        public bool activo { get; set; }
+        public string username { get; set; }
+
+        public string marca { get; set; }  
+        public string campo { get; set; }   
+        public string antes { get; set; }
+        public string despues { get; set; } 
+
+    }
+
     public class UpdateDataModel 
     {
         public string jsondata { get; set; }
         public int tipo { get; set; }
+    }
+
+    public class cambiosporRegistro 
+    {
+        public string campo { get; set; }
+        public string valorantes { get; set; }
+        public string valordespues { get; set; }
     }
 
 }
