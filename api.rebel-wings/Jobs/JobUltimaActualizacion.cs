@@ -211,7 +211,7 @@ namespace api.rebel_wings.Jobs
         {
             // Configurar la información de la cuenta de Gmail
             string correoRemitente = "gilberto.r@operamx.com";
-            string contraseña = "Gil19315"; 
+            string contraseña = "GRC1931519315"; 
 
             // Configurar la información del destinatario
            // string correoDestinatario = "developeramh@outlook.com";
@@ -239,9 +239,9 @@ namespace api.rebel_wings.Jobs
             mensaje.To.Add("daniel.f@operamx.com");
             mensaje.To.Add("daniel.h@operamx.com");
             mensaje.To.Add("gilberto.r@operamx.com");
-            mensaje.To.Add("melecio.a@operamx.com");
             mensaje.To.Add("alejandro.l@operamx.com");
-            mensaje.To.Add("francisco.q@operamx.com");
+            mensaje.To.Add("edder.m@operamx.com");
+            mensaje.To.Add("hugo.t@operamx.com ");
 
             try
             {

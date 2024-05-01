@@ -25,7 +25,7 @@ namespace biz.bd2.Entities
         public string Filtro { get; set; }
         public string RegularizaSemanal { get; set; }
         public int? Orden { get; set; }
-
+        public string InventarioMensual { get; set; }
         public virtual Articulo1 CodarticuloNavigation { get; set; }
     }
 }

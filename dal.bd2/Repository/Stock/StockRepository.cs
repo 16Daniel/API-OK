@@ -87,6 +87,16 @@ namespace dal.bd2.Repository.Stock
              
         }
 
+        public String ObtenerAlmacen(int idsucursal)
+        {
+            var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == idsucursal).Codalmventas;
+            if (serie != null)
+            {
+                return serie.ToString();
+            }
+            else { return null; }
+        }
+
         public List<biz.bd2.Models.StockDto> GetStockV(int id_sucursal)
         {
             List<biz.bd2.Models.StockDto> _stock = new List<biz.bd2.Models.StockDto>();
@@ -148,6 +158,90 @@ namespace dal.bd2.Repository.Stock
 
 
 
+
+        }
+
+        public List<biz.bd2.Models.StockDto> GetStockM(int id_sucursal)
+        {
+            List<biz.bd2.Models.StockDto> _stock = new List<biz.bd2.Models.StockDto>();
+            List<biz.bd2.Models.StockDto> _stock2 = new List<biz.bd2.Models.StockDto>();
+            var Hrs = DateTime.Now.Hour;
+            var ampm = Hrs >= 12 ? "PM" : "AM";
+
+            var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
+            if (serie != null)
+            {
+                _stock = _context.Stocks
+                    .Join(_context.Articuloscamposlibres,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        Regulariza = stk.Regulariza,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        InventarioMensual = stk.InventarioMensual,
+                        Orden = stk.Orden,
+
+                    })
+                    .Join(_context.Articulos1,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        Regulariza = art.Regulariza,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = stk.Unidadmedida,
+                        InventarioMensual = art.InventarioMensual,
+                        Orden = art.Orden,
+                    })
+                    .Where(s => s.Codalmacen == serie && s.InventarioMensual == "T").ToList();
+
+            }
+            //if (ampm.ToString().Equals("AM"))
+            //{
+
+            //    _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha == DateTime.Now.Date && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 1 && es.Hora.Value.Hour < 7 && es.Tipo == "REG").Any()).ToList();
+
+
+            //    return _stock;
+
+
+            //}
+            //else
+            //{
+
+            //    _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha == DateTime.Now.Date.AddDays(1) && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 1 && es.Hora.Value.Hour < 7 && es.Tipo == "REG").Any()).ToList();
+            //    return _stock;
+            //}
+            return _stock;
+
+
+
+        }
+
+        public biz.bd2.Models.getArticulo GetStockArticulo(int sucursal, int codarticulo, string codAlmacen)
+        {
+            
+            var _art = from stk in _context.Stocks
+                join art in _context.Articulos1 on stk.Codarticulo equals art.Codarticulo
+                join artlin in _context.Articuloslins on stk.Codarticulo equals artlin.Codarticulo
+                where (art.Codarticulo == codarticulo) && (stk.Codalmacen == codAlmacen)
+                select new getArticulo() { 
+                    Descripcion = art.Descripcion,
+                    stockAnt = ((decimal?)stk.Stock1),
+                    precio = ((decimal?)artlin.Preciocomprareal),
+                    Referencia = art.Refproveedor,
+                    Medida = art.Unidadmedida
+                };
+            
+            
+            return _art.SingleOrDefault();
 
         }
 
@@ -1211,6 +1305,126 @@ namespace dal.bd2.Repository.Stock
 
 
             return reportes;
+        }
+
+        public bool UpdateStockInv(int codArticulo, string codAlmacen, double cantidad)
+        {
+            biz.bd2.Models.StockDto _stock = new biz.bd2.Models.StockDto();
+            // FECHA DE INVENTARIOS
+            var tablaInv = DateTime.Now.Date;
+            var Hrs = DateTime.Now.Hour;
+            var ampm = Hrs >= 12 ? "PM" : "AM";
+            var diAsignado = DateTime.Now.Date;
+
+            if (ampm.ToString().Equals("PM"))
+            {
+                Console.WriteLine("SI ES PM");
+                tablaInv = DateTime.Now.Date.AddDays(1);
+                diAsignado = DateTime.Now.Date.AddDays(1);
+            }
+            else
+            {
+                Console.WriteLine("SI ES AM ");
+                tablaInv = DateTime.Now.Date;
+                diAsignado = DateTime.Now.Date;
+            }
+
+            if (_context.Inventarios.FirstOrDefault(x => x.Codalmacen == codAlmacen && x.Fecha == diAsignado.Date) != null)
+            {
+                tablaInv = _context.Inventarios.FirstOrDefault(x => x.Codalmacen == codAlmacen && x.Fecha == diAsignado.Date).Fecha;
+            }
+            else
+            {
+                if (ampm.ToString().Equals("PM"))
+                {
+                    tablaInv = DateTime.Now.Date.AddDays(1); ;
+                }
+
+            }
+
+            var __stock = _context.Stocks.FirstOrDefault(x => x.Codarticulo == codArticulo && x.Codalmacen == codAlmacen);
+            double _stockAnterior = __stock.Stock1.Value;
+            if (__stock != null)
+            {
+                __stock.Stock1 = cantidad;
+
+                _stock.Codalmacen = codAlmacen;
+                _stock.Descripcion = _stock.Descripcion;
+                _stock.Codarticulo = codArticulo;
+                _stock.Regulariza = "T";
+                _stock.Unidadessat = "";
+                _stock.Stock1 = cantidad;
+
+                _context.Stocks.Update(__stock);
+
+                if (tablaInv != diAsignado)
+                {
+                    var FechV = diAsignado;
+
+                    biz.bd2.Entities.Inventario _inventario = new biz.bd2.Entities.Inventario();
+
+                    _inventario.Fecha = FechV.Date;
+                    _inventario.Codalmacen = codAlmacen;
+                    _inventario.Tipovaloracion = -3;
+                    _inventario.Serie = "";
+                    _inventario.Numero = 0;
+                    _inventario.Codvendedor = -1;
+                    _inventario.Completo = "F";
+                    _inventario.Metodo = 1;
+                    _inventario.Inicial = "F";
+                    _inventario.Bloqueado = "F";
+                    _inventario.Tipovaloraciondmn = null;
+                    _inventario.Estado = 0;
+                    _inventario.Escierre = false;
+                    _inventario.EnlaceEjercicio = null;
+                    _inventario.EnlaceEmpresa = null;
+                    _inventario.EnlaceUsuario = null;
+                    _inventario.EnlaceAsiento = null;
+
+                    _context.Inventarios.Add(_inventario);
+
+                }
+
+                DateTime FechVC = diAsignado.Date.AddHours(2);
+
+                biz.bd2.Entities.Moviment _moviment = new biz.bd2.Entities.Moviment();
+                _moviment.Codalmacenorigen = codAlmacen;
+                _moviment.Codalmacendestino = "";
+                _moviment.Numserie = "";
+                _moviment.Codarticulo = codArticulo;
+                _moviment.Talla = ".";
+                _moviment.Color = ".";
+                _moviment.Precio = _context.Articuloscamposlibres.FirstOrDefault(x => x.Codarticulo == codArticulo)?.Precioproveedor;
+                _moviment.Fecha = FechVC.Date;
+                _moviment.Hora = Convert.ToDateTime("1899-12-30 " + FechVC.Hour + ":" + FechVC.Minute + ":" + FechVC.Second + ".000");
+                _moviment.Codprocli = 0;
+                _moviment.Tipo = "REG";
+                _moviment.Unidades = cantidad;
+                _moviment.Seriedoc = "";
+                _moviment.Numdoc = 0;
+                _moviment.Seriecompra = "";
+                _moviment.Numfaccompra = -1;
+                _moviment.Caja = "";
+                _moviment.Stock = _stockAnterior;
+                _moviment.Pvp = 0;
+                _moviment.Codmonedapvp = 1;
+                _moviment.Calcmovpost = "F";
+                _moviment.Udmedida2 = 0;
+                _moviment.Zona = "";
+                _moviment.Pvpdmn = null;
+                _moviment.Preciodmn = null;
+                _moviment.Stock2 = 0;
+
+                _context.Moviments.Add(_moviment);
+
+
+                _context.SaveChanges();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }

@@ -5,6 +5,7 @@ using api.rebel_wings.Models.RequestTransfer;
 using api.rebel_wings.Models.SalesExpectations;
 using api.rebel_wings.Models.Stock;
 using api.rebel_wings.Models.User;
+using api.rebel_wings.Models.InventarioMensual;
 using AutoMapper;
 using biz.fortia.Repository.RH;
 using biz.rebel_wings.Entities;
@@ -14,6 +15,7 @@ using biz.rebel_wings.Repository.Stock;
 using biz.rebel_wings.Repository.User;
 using biz.rebel_wings.Services.Logger;
 using Microsoft.AspNetCore.Mvc;
+using biz.rebel_wings.Repository.InventarioMensual;
 using Newtonsoft.Json;
 using biz.rebel_wings.Repository;
 
@@ -40,6 +42,8 @@ namespace api.rebel_wings.Controllers
         private readonly biz.bd2.Repository.Stock.IStockRepository _stockDB2Repository;
         private readonly IStockRepository _stockRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IInventarioMensualRepository _inventarioMensualRepository;
+        private readonly IInventarioMensualRegistroRepository _inventarioMensualRegistroRepository;
         /// <summary>
         /// Contructor
         /// </summary>
@@ -47,12 +51,16 @@ namespace api.rebel_wings.Controllers
         /// <param name="salesExpectationRepository"></param>
         /// <param name="stockChickeUsedRepository"></param>
         /// <param name="stockChickenByBranchRepository"></param>
+        /// <param name="inventarioMensualRepository"></param>
+        /// <param name="inventarioMensualRegistroRepository"></param>
         /// <param name="mapper"></param>
         /// <param name="logger"></param>
         /// <param name="iRhTrabRepository"></param>
         public StockChickenController(
             ICatStatusStockChickenRepository catStatusSalesExpectationRepository,
             IStockChickenRepository salesExpectationRepository,
+            IInventarioMensualRepository inventarioMensualRepository,
+            IInventarioMensualRegistroRepository inventarioMensualRegistroRepository,
             IMapper mapper,
             ILoggerManager logger,
             IStockChickeUsedRepository stockChickeUsedRepository,
@@ -77,6 +85,8 @@ namespace api.rebel_wings.Controllers
             _stockDB2Repository = stockDB2Repository;
             _stockRepository = stockRepository;
             _userRepository = userRepository;
+            _inventarioMensualRegistroRepository = inventarioMensualRegistroRepository;
+            _inventarioMensualRepository = inventarioMensualRepository;
         }
         /// <summary>
         /// GET para retornar por ID Expectativa de Venta
@@ -166,6 +176,46 @@ namespace api.rebel_wings.Controllers
                         break;
                     case "DB2":
                         response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockV(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetStockM", Name = "GetStockM")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockM(int id_sucursal, string dataBase)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<StockDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockM(id_sucursal));
                         response.Message = "success";
                         break;
                     default:
@@ -421,6 +471,57 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// POST Para actualizar Stock y hacer regularizacion en ICG
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("AddRegularizateMensual", Name = "AddRegularizateMensual")]
+        public ActionResult<ApiResponse<StockDto>> AddRegularizateMensual(int registro, int idsucursal)
+        {
+            var response = new ApiResponse<StockDto>();
+
+            try
+            {
+                var capturas = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturas(registro));
+                var procesado = false;
+                var codAlmacen = _mapper.Map<String>(_stockDB2Repository.ObtenerAlmacen(idsucursal));
+                var contador = 0;
+                foreach (var item in capturas)
+                {
+                    procesado = _mapper.Map<Boolean>(_stockDB2Repository.UpdateStockInv(item.Codarticulo, codAlmacen, ((double)item.Unidades.Value)));
+                    if (procesado == true)
+                    {
+                        //actualizar registro a procesado
+                        var actualizado = _mapper.Map<Boolean>(_inventarioMensualRepository.procesadoCapturas(item.Id));
+                        if(actualizado == true) { contador += 1; }
+                    }
+                }
+                if (capturas.Count() == contador)
+                {
+                    var registroProcesado = _mapper.Map<Boolean>(_inventarioMensualRegistroRepository.procesadoRegistro(registro));
+                    if (registroProcesado == true)
+                    {
+                        response.Message = "success";
+                    }
+                }
+                else {
+                    response.Message = "incomplete";
+                }
+                        
+                       
+
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
 
         [HttpGet("{id}/Sales-Expectation")]
         [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
@@ -928,8 +1029,213 @@ namespace api.rebel_wings.Controllers
         private static string FormattedAmount(decimal _amount)
         {
             return $"{_amount:C}";
-        }  
-        
+        }
+
+        /// <summary>
+        /// POST Para generar nuevo registro de inventario
+        /// </summary>
+
+        [HttpPost("AddRegistro", Name = "AddRegistro")]
+        public ActionResult<ApiResponse<InventarioMensualRegistroDto>> AddRegistro(int city, int sucursal, string captura)
+        {
+            var response = new ApiResponse<InventarioMensualRegistroDto>();
+
+            try
+            {
+                
+                       
+                        response.Result = _mapper.Map<InventarioMensualRegistroDto>(_inventarioMensualRegistroRepository.CreaRegistro(city, sucursal, captura));
+                        response.Message = "success";
+               
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar numero de registro pendiente de procesar
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("GetRegistro", Name = "GetRegistro")]
+        public ActionResult<ApiResponse<InventarioMensualRegistroDto>> GetRegistro(int id_sucursal)
+        {
+            
+            var response = new ApiResponse<InventarioMensualRegistroDto>();
+
+            try
+            {
+                
+                response.Result = _mapper.Map<InventarioMensualRegistroDto>(_inventarioMensualRegistroRepository.GetRegistro(id_sucursal));
+                response.Message = "success";
+                       
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// POST Para generar nuevo registro de inventario
+        /// </summary>
+
+        [HttpPost("AddCaptura", Name = "AddCaptura")]
+        public ActionResult<ApiResponse<InventarioMensualDto>> AddCaptura(int city, int sucursal, int codarticulo, decimal unidades, string codAlmacen, int registro)
+        {
+            var response = new ApiResponse<InventarioMensualDto>();
+
+            try
+            {
+                var art = _stockDB2Repository.GetStockArticulo(sucursal, codarticulo, codAlmacen);
+
+                response.Result = _mapper.Map<InventarioMensualDto>(_inventarioMensualRepository.CreaCaptura(city, sucursal, codarticulo, unidades, art.precio, art.stockAnt,art.Referencia,art.Medida, art.Descripcion, registro));
+                response.Message = "success";
+
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetCaptura", Name = "GetCaptura")]
+        public ActionResult<ApiResponse<List<InventarioMensualDto>>> GetCaptura(int registro, string dataBase)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<InventarioMensualDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturas(registro));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+
+        [HttpPut("ModificaCaptura", Name = "ModificaCaptura")]
+        public ActionResult<ApiResponse<InventarioMensualDto>> ModCaptura(int idcaptura, string dataBase, decimal unidades)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<InventarioMensualDto>();
+
+            try
+            {
+                
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<InventarioMensualDto>(_inventarioMensualRepository.modificaCapturas(idcaptura, unidades));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetExcel", Name = "GetExcel")]
+        public ActionResult<ApiResponse<List<InventarioMensualDto>>> GetExcel(int registro, string dataBase, string sucursal, string correo, int idsucursal)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<InventarioMensualDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturasExcel(registro, sucursal, correo));
+                        response.Message = "success";
+                        AddRegularizateMensual(registro, idsucursal);
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
     }
 
 }

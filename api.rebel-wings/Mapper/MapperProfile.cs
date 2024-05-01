@@ -48,6 +48,7 @@ using api.rebel_wings.Models.Mermas;
 using api.rebel_wings.Models.Implementacion;
 using api.rebel_wings.Models.Stock;
 using api.rebel_wings.Models.WashBasinWithSoapPaper;
+using api.rebel_wings.Models.InventarioMensual;
 using AutoMapper;
 using biz.bd1.Entities;
 using biz.bd1.Models;
@@ -62,6 +63,8 @@ using DashboardAssistance = api.rebel_wings.Models.Dashboard.DashboardAssistance
 using DashboardRegional = biz.rebel_wings.Models.Dashboard.DashboardRegional;
 using DashboardSupervisor = biz.rebel_wings.Models.Dashboard.DashboardSupervisor;
 using Inventario = biz.rebel_wings.Entities.Inventario;
+using InventarioMensual = biz.rebel_wings.Entities.InventarioMensual;
+using InventarioMensualRegistro = biz.rebel_wings.Entities.InventarioMensualRegistro;
 using Task = biz.rebel_wings.Entities.Task;
 using TaskPerShifts = biz.rebel_wings.Models.Dashboard.TaskPerShifts;
 
@@ -209,6 +212,8 @@ namespace api.rebel_wings.Mapper
             CreateMap<biz.bd1.Entities.TFotosPedidosEntrega, TFotosPedidosEntregaDto>().ReverseMap();
             CreateMap<biz.bd2.Entities.TFotosPedidosEntrega, TFotosPedidosEntregaDto>().ReverseMap();
             CreateMap<Inventario, StockV2>().ReverseMap();
+            CreateMap<InventarioMensual, InventarioMensualDto>().ReverseMap();
+            CreateMap<InventarioMensualRegistro, InventarioMensualRegistroDto>().ReverseMap();
             CreateMap<Tiempos, TiemposDto>().ReverseMap();
             CreateMap<_25pts, _25ptsDto>().ReverseMap();
             CreateMap<Mermas, MermasDto>().ReverseMap();

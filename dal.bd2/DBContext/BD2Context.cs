@@ -5290,6 +5290,11 @@ namespace dal.bd2.DBContext
                 .HasMaxLength(1)
                 .IsFixedLength();
 
+                entity.Property(e => e.InventarioMensual)
+                .HasColumnName("INV_MENSUAL")
+                .HasMaxLength(1)
+                .IsFixedLength();
+
                 entity.Property(e => e.Orden)
                 .HasColumnName("ORDEN_INVENTARIO_APP");
 
