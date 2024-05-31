@@ -4,7 +4,7 @@ namespace biz.rebel_wings.Repository.InventarioMensual
 {
     public interface IInventarioMensualRepository : IGenericRepository<Entities.InventarioMensual>
     {
-        biz.rebel_wings.Models.InventarioMensual.InventarioMensual CreaCaptura(int city, int sucursal, int codarticulo, decimal? unidades, decimal? precio, decimal? stockant,string referencia,string medida, string descripcion, int registro);
+        biz.rebel_wings.Models.InventarioMensual.InventarioMensual CreaCaptura(int city, int sucursal, int codarticulo, decimal? unidades, decimal? precio, decimal? stockant,string referencia,string medida, string descripcion, int registro, int? orden, string tipo);
         List<biz.rebel_wings.Models.InventarioMensual.InventarioMensual> getCapturas(int registro);
         biz.rebel_wings.Models.InventarioMensual.InventarioMensual modificaCapturas(int idcaptura, decimal unidades);
         Boolean procesadoCapturas(int idcaptura);

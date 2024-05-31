@@ -334,6 +334,12 @@ namespace dal.rebel_wings.DBContext
                     .HasColumnType("datetime")
                     .HasColumnName("date");
                 entity.Property(e => e.Procesado).HasColumnName("procesado");
+                entity.Property(e => e.orden).HasColumnName("orden");
+                entity.Property(e => e.tipo)
+                   .IsRequired()
+                   .HasMaxLength(50)
+                   .IsUnicode(false)
+                   .HasColumnName("tipo");
 
             });
             modelBuilder.Entity<InventarioMensualRegistro>(entity =>

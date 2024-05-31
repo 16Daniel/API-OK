@@ -231,13 +231,17 @@ namespace dal.bd2.Repository.Stock
             var _art = from stk in _context.Stocks
                 join art in _context.Articulos1 on stk.Codarticulo equals art.Codarticulo
                 join artlin in _context.Articuloslins on stk.Codarticulo equals artlin.Codarticulo
+                join tipo in _context.Articuloscamposlibres on art.Codarticulo equals tipo.Codarticulo
                 where (art.Codarticulo == codarticulo) && (stk.Codalmacen == codAlmacen)
                 select new getArticulo() { 
                     Descripcion = art.Descripcion,
                     stockAnt = ((decimal?)stk.Stock1),
                     precio = ((decimal?)artlin.Preciocomprareal),
                     Referencia = art.Refproveedor,
-                    Medida = art.Unidadmedida
+                    Medida = art.Unidadmedida,
+                    orden = tipo.Orden,
+                    tipo = tipo.TipoDeArticulo
+                    
                 };
             
             

@@ -22,6 +22,8 @@ namespace biz.rebel_wings.Entities
         public decimal? Precio { get; set; }
         public DateTime Date { get; set; }
         public bool Procesado { get; set; }
+        public int? orden { get; set; }
+        public string? tipo { get; set; }
     }
 }
 

@@ -23,5 +23,8 @@ namespace biz.rebel_wings.Models.InventarioMensual
         public decimal? Precio { get; set; }
         public DateTime Date { get; set; }
         public bool Procesado { get; set; }
+        public int? orden { get; set; }
+        public string? tipo { get; set; }
+        public decimal? ValorDif { get; set; }
     }
 }

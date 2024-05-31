@@ -27,5 +27,7 @@ namespace biz.bd2.Models
          public string Descripcion { get; set; }
          public string Referencia { get; set; }
          public string Medida { get; set; }
+         public int? orden { get; set; }
+         public string? tipo { get; set; }
     }
 }

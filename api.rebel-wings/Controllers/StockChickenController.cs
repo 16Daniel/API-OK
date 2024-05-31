@@ -1102,7 +1102,7 @@ namespace api.rebel_wings.Controllers
             {
                 var art = _stockDB2Repository.GetStockArticulo(sucursal, codarticulo, codAlmacen);
 
-                response.Result = _mapper.Map<InventarioMensualDto>(_inventarioMensualRepository.CreaCaptura(city, sucursal, codarticulo, unidades, art.precio, art.stockAnt,art.Referencia,art.Medida, art.Descripcion, registro));
+                response.Result = _mapper.Map<InventarioMensualDto>(_inventarioMensualRepository.CreaCaptura(city, sucursal, codarticulo, unidades, art.precio, art.stockAnt,art.Referencia,art.Medida, art.Descripcion, registro, art.orden, art.tipo));
                 response.Message = "success";
 
             }

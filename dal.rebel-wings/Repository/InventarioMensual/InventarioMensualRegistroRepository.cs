@@ -40,7 +40,7 @@ public class InventarioMensualRegistroRepository : GenericRepository<biz.rebel_w
         {
             var timeNow = DateTime.Now;
             biz.rebel_wings.Models.InventarioMensual.InventarioMensualRegistro __registro = new biz.rebel_wings.Models.InventarioMensual.InventarioMensualRegistro();
-            var pendiente = _context.InventariosRegistrosMensuales.FirstOrDefault(x => x.Sucursal == sucursal);
+            var pendiente = _context.InventariosRegistrosMensuales.OrderByDescending(n => n.DateCaptura).FirstOrDefault(x => x.Sucursal == sucursal);
             if (pendiente != null)
             {
                 
