@@ -19,6 +19,6 @@ namespace biz.rebel_wings.Entities
         public string Usuario { get; set; } = null!;
         public string Sucursal { get; set; } = null!;
 
-
+        public string? Vendedor { get; set; } = null!;   
     }
 }

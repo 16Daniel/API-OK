@@ -19,4 +19,5 @@ public class Envio25ptsDto
     public string Justificacion { get; set; } = null!;
     public string Usuario { get; set; } = null!;
     public string Sucursal { get; set; } = null!;
+    public string? Vendedor { get; set; } = null!;   
 }

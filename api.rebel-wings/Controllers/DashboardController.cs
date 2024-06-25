@@ -20,6 +20,7 @@ using biz.bd1.Models;
 using System.IO.Pipes;
 using System.Linq;
 using biz.bd2.Models;
+using dal.rebel_wings.DBContext;
 
 namespace api.rebel_wings.Controllers;
 /// <summary>
@@ -40,7 +41,7 @@ public class DashboardController : ControllerBase
     private readonly biz.bd2.Repository.Sucursal.ISucursalRepository _sucursalDB2Repository;
     private readonly biz.rebel_wings.Repository.Implementacion.ITiemposRepository _tiemposRepository;
     private readonly biz.rebel_wings.Repository.Implementacion.I25ptsRepository _i25ptsRepository;
-
+    private Db_Rebel_WingsContext _dbContext;
     private readonly JobReporteMensualTemp _job;
     /// <summary>
     /// Constructor
@@ -59,7 +60,8 @@ public class DashboardController : ControllerBase
         biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository,
         ITiemposRepository tiemposRepository,
         I25ptsRepository i25ptsRepository,
-        IServiceScopeFactory serviceScopeFactory)
+        IServiceScopeFactory serviceScopeFactory,
+        Db_Rebel_WingsContext dbcontext)
     {
         _dashboardRepository = dashboardRepository;
         _iRHTrabRepository = iRhTrabRepository;
@@ -72,7 +74,7 @@ public class DashboardController : ControllerBase
         _tiemposRepository = tiemposRepository;
         _i25ptsRepository = i25ptsRepository;
         _job = new JobReporteMensualTemp(serviceScopeFactory);
-
+        _dbContext = dbcontext;
 }
    /// <summary>
    /// GET:
@@ -915,11 +917,11 @@ public class DashboardController : ControllerBase
             var orders = new List<Envio25ptsDto>();
             foreach (var envio25ptsDto in envio25ptsDtos)
             {
-
                 var order = await _i25ptsRepository.AddAsyn(_mapper.Map<_25pts>(envio25ptsDto));
                 orders.Add(_mapper.Map<Envio25ptsDto>(order));
             }
 
+          
             response.Result = orders;
             response.Message = "Consult was success";
             response.Success = true;

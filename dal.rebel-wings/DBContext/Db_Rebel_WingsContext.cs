@@ -376,6 +376,7 @@ namespace dal.rebel_wings.DBContext
                 entity.Property(e => e.Cobros).HasColumnName("COBROS");
                 entity.Property(e => e.CobrosMinimos).HasColumnName("COBROS_MINIMOS");
                 entity.Property(e => e.Diferencia).HasColumnName("DIFERENCIA");
+                entity.Property(e => e.Vendedor).HasColumnName("VENDEDOR"); 
                 entity.Property(e => e.Justificacion)
                     .IsRequired()
                     .HasMaxLength(800)
