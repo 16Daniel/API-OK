@@ -44,7 +44,7 @@ public class Reporte
     public double Diferencia { get; set; }
     public DateTime Captura { get; set; }
     public string Seccion { get; set; }
-
+    public double? Mermasayer { get; set; }
 }
 public class Vendedor
 {

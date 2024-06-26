@@ -970,6 +970,7 @@ namespace dal.bd2.Repository.Stock
                 repp.Captura = (DateTime)reader["CAPTURA"];
                 repp.InvFormula = (double)reader["INVFORMULA"];
                 repp.Diferencia = (double)reader["DIFERENCIA"];
+                repp.Mermasayer = (double)reader["MERMASAYER"]; 
                 reportes.Add(repp);
             }
             connection.Close();
