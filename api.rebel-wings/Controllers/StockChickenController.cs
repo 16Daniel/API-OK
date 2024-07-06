@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 using biz.rebel_wings.Repository.InventarioMensual;
 using Newtonsoft.Json;
 using biz.rebel_wings.Repository;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace api.rebel_wings.Controllers
 {
@@ -44,6 +46,8 @@ namespace api.rebel_wings.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IInventarioMensualRepository _inventarioMensualRepository;
         private readonly IInventarioMensualRegistroRepository _inventarioMensualRegistroRepository;
+        private readonly IConfiguration _configuration;
+        public string defaultconnectionString = "";
         /// <summary>
         /// Contructor
         /// </summary>
@@ -70,7 +74,7 @@ namespace api.rebel_wings.Controllers
             biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository,
             biz.bd1.Repository.Stock.IStockRepository stockDB1Repository,
             biz.bd2.Repository.Stock.IStockRepository stockDB2Repository,
-            IStockRepository stockRepository, IUserRepository userRepository)
+            IStockRepository stockRepository, IUserRepository userRepository, IConfiguration configuration)
         {
             _logger = logger;
             _mapper = mapper;
@@ -87,6 +91,9 @@ namespace api.rebel_wings.Controllers
             _userRepository = userRepository;
             _inventarioMensualRegistroRepository = inventarioMensualRegistroRepository;
             _inventarioMensualRepository = inventarioMensualRepository;
+            _configuration = configuration;
+            defaultconnectionString = _configuration.GetConnectionString("DefaultConnection");
+
         }
         /// <summary>
         /// GET para retornar por ID Expectativa de Venta
@@ -1236,6 +1243,146 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+
+        [HttpPost]
+        [Route("GuardarubicacionesInventario")]
+        public IActionResult guardarubicaciones([FromBody] addubicacioninventarioModel model)
+        {
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("GUARDAR_UBICACIONES_INVENTARIO", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Agregar parámetros
+                    command.Parameters.Add(new SqlParameter("@CODART", model.codart));
+                    command.Parameters.Add(new SqlParameter("@JADATA", model.jdata));
+                    command.Parameters.Add(new SqlParameter("@IDU", model.idu));
+                    command.Parameters.Add(new SqlParameter("@IDS", model.ids));
+                    command.Parameters.Add(new SqlParameter("@VISTA", model.vista));
+                    command.Parameters.Add(new SqlParameter("@TOTAL", model.total));
+
+                    try
+                    {
+                        // Abrir la conexión
+                        connection.Open();
+
+                        // Ejecutar el procedimiento almacenado
+                        command.ExecuteNonQuery();
+
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message });
+                    }
+                }
+            }
+
+        }
+
+
+        [HttpGet]
+        [Route("getUbicacionesInventario")]
+        public IActionResult getUbicaciones()
+        {
+            List<UbicacionesModel> lista = new List<UbicacionesModel>();
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("GET_UBICACIONES_INVENTARIO", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                lista.Add(new UbicacionesModel
+                                {
+                                    id = (int)reader["ID"],
+                                    codart = (int)reader["CODART"],
+                                    jdata = (string)reader["JDATA"],
+                                    idu = (string)reader["IDUSUARIO"],
+                                    ids = (string)reader["IDSUCURSAL"],
+                                    vista = (int)reader["VISTA"],
+                                    total = (double)reader["TOTAL"]
+                                });
+                            }
+                        }
+
+                        return StatusCode(StatusCodes.Status200OK, lista); 
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
+                        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                    }
+                }
+            }
+
+        }
+
+
+        [HttpGet]
+        [Route("EliminarUbicacionesInventario/{id}")]
+        public IActionResult eliminarubicaciones(int id)
+        {
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("ELIMINAR_UBICACIONES_INVENTARIO", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Agregar parámetros
+                    command.Parameters.Add(new SqlParameter("@ID", id));
+
+                    try
+                    {
+                        // Abrir la conexión
+                        connection.Open();
+
+                        // Ejecutar el procedimiento almacenado
+                        command.ExecuteNonQuery();
+
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message });
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    public class addubicacioninventarioModel 
+    {
+        public int codart { get; set; }
+        public string jdata { get; set; }
+        public string idu { get; set; }
+        public string ids { get; set; }
+        public int vista { get; set; }  
+        public double total { get; set; }
+    
+    }
+
+    public class UbicacionesModel
+    {
+        public int id { get; set; }
+        public int codart { get; set; }
+        public string jdata { get; set; }
+        public string idu { get; set; }
+        public string ids { get; set; }
+        public int vista { get; set; }
+        public double total { get; set; }
     }
 
 }

@@ -795,12 +795,13 @@ namespace api.rebel_wings.Controllers
                                 {
                                    
                                 }
-                                
 
+                                string nomart = string.Empty; 
                                 //detectar cuantos cambios se realizaron
                                 List<cambiosporRegistro> cambiosxr = new List<cambiosporRegistro>();
                                 if (accion.Contains("GENERALES"))
                                 {
+                                    nomart = objdata.newdata.descripcion;
                                     if (objdata.data.descripcion != objdata.newdata.descripcion)
                                     {
                                         cambiosxr.Add(new cambiosporRegistro
@@ -928,11 +929,13 @@ namespace api.rebel_wings.Controllers
                                     var articulo = _articulosRespositoryBD2.GetAll().Where(ar => ar.Codarticulo == idartv).Select(s => new
                                     {
                                         marca = s.Marca,
+                                        nombre = s.Descripcion,
                                     }).ToList();
                                     if (articulo.Count>0) 
                                     {
                                         var objmarca = _contextdb2.Marcas.Where(m => m.Codmarca == articulo[0].marca).FirstOrDefault();
-                                        marca = objmarca == null ? "" : objmarca.Descripcion; 
+                                        marca = objmarca == null ? "" : objmarca.Descripcion;
+                                        nomart = articulo[0].nombre; 
                                     }
 
                                     if (objdata.data.articulolin[0].costemedio != objdata.newdata.costemedio)
@@ -997,11 +1000,13 @@ namespace api.rebel_wings.Controllers
                                     var articulo = _articulosRespositoryBD2.GetAll().Where(ar => ar.Codarticulo == idartv).Select(s => new
                                     {
                                         marca = s.Marca,
+                                        nombre = s.Descripcion
                                     }).ToList();
                                     if (articulo.Count > 0)
                                     {
                                         var objmarca = _contextdb2.Marcas.Where(m => m.Codmarca == articulo[0].marca).FirstOrDefault();
                                         marca = objmarca == null ? "" : objmarca.Descripcion;
+                                        nomart = articulo[0].nombre;
                                     }
 
                                     if (objdata.data[0].pneto != objdata.newdata.pbruto)
@@ -1041,6 +1046,7 @@ namespace api.rebel_wings.Controllers
                                     model.antes = item.valorantes;
                                     model.despues = item.valordespues;
                                     model.campo = item.campo;
+                                    model.articulo = nomart;
                                     listacambios.Add(model);
 
                                 }
@@ -1335,6 +1341,7 @@ namespace api.rebel_wings.Controllers
         public string campo { get; set; }   
         public string antes { get; set; }
         public string despues { get; set; } 
+        public string articulo { get; set; }
 
     }
 
