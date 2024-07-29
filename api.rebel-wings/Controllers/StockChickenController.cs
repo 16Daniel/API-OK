@@ -1328,6 +1328,52 @@ namespace api.rebel_wings.Controllers
         }
 
 
+
+        [HttpGet]
+        [Route("getUbicacionesInventarioMensual")]
+        public IActionResult getUbicacionesMensual()
+        {
+            List<UbicacionesModel> lista = new List<UbicacionesModel>();
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("GET_UBICACIONES_INVENTARIO_MENSUAL", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                lista.Add(new UbicacionesModel
+                                {
+                                    id = (int)reader["ID"],
+                                    codart = (int)reader["CODART"],
+                                    jdata = (string)reader["JDATA"],
+                                    idu = (string)reader["IDUSUARIO"],
+                                    ids = (string)reader["IDSUCURSAL"],
+                                    vista = (int)reader["VISTA"],
+                                    total = (double)reader["TOTAL"]
+                                });
+                            }
+                        }
+
+                        return StatusCode(StatusCodes.Status200OK, lista);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
+                        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                    }
+                }
+            }
+
+        }
+
+
         [HttpGet]
         [Route("EliminarUbicacionesInventario/{id}")]
         public IActionResult eliminarubicaciones(int id)
@@ -1360,6 +1406,50 @@ namespace api.rebel_wings.Controllers
             }
 
         }
+
+        [HttpGet]
+        [Route("EliminarUbicacionesInventarioMensual/{idsuc}/{idu}")]
+        public IActionResult eliminarubicacionesMensual(int idsuc, int idu)
+        {
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("ELIMINAR_UBICACIONES_INVENTARIO_MENSUAL", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Agregar parámetros
+                    command.Parameters.Add(new SqlParameter("@IDSUC", idsuc));
+                    command.Parameters.Add(new SqlParameter("@IDUSUARIO", idu));
+
+                    try
+                    {
+                        // Abrir la conexión
+                        connection.Open();
+
+                        // Ejecutar el procedimiento almacenado
+                        command.ExecuteNonQuery();
+
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message });
+                    }
+                }
+            }
+
+        }
+
+        [HttpGet]
+        [Route("getFechaServidor")]
+        public IActionResult getFechaServidor()
+        {
+            DateTime fecha = DateTime.Now.Date;
+            return StatusCode(StatusCodes.Status200OK, new { date = fecha, success = true });
+        }
+
+      
 
     }
 

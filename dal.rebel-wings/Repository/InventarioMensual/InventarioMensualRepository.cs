@@ -334,7 +334,7 @@ public class InventarioMensualRepository : GenericRepository<biz.rebel_wings.Ent
         mensaje.To.Add("adrian.c@operamx.com");
         mensaje.To.Add("gilberto.r@operamx.com");
         mensaje.To.Add("roberto.c@operamx.com");
-        mensaje.To.Add("carlos.c@operamx.com"); 
+        mensaje.To.Add("carlos.c@operamx.com");
 
         ////servicio
         mensaje.To.Add("jose.r@operamx.com");
@@ -345,6 +345,7 @@ public class InventarioMensualRepository : GenericRepository<biz.rebel_wings.Ent
         mensaje.To.Add("sergio.g@operamx.com");
         mensaje.To.Add("daniel.h@operamx.com");
 
+        // mensaje.To.Add("arturo.m@operamx.com");
 
         try
         {

@@ -797,11 +797,13 @@ namespace api.rebel_wings.Controllers
                                 }
 
                                 string nomart = string.Empty; 
+                                string referencia = string.Empty;
                                 //detectar cuantos cambios se realizaron
                                 List<cambiosporRegistro> cambiosxr = new List<cambiosporRegistro>();
                                 if (accion.Contains("GENERALES"))
                                 {
                                     nomart = objdata.newdata.descripcion;
+                                    referencia = objdata.newdata.referencia;
                                     if (objdata.data.descripcion != objdata.newdata.descripcion)
                                     {
                                         cambiosxr.Add(new cambiosporRegistro
@@ -930,12 +932,14 @@ namespace api.rebel_wings.Controllers
                                     {
                                         marca = s.Marca,
                                         nombre = s.Descripcion,
+                                        referencia = s.Refproveedor
                                     }).ToList();
                                     if (articulo.Count>0) 
                                     {
                                         var objmarca = _contextdb2.Marcas.Where(m => m.Codmarca == articulo[0].marca).FirstOrDefault();
                                         marca = objmarca == null ? "" : objmarca.Descripcion;
-                                        nomart = articulo[0].nombre; 
+                                        nomart = articulo[0].nombre;
+                                        referencia = articulo[0].referencia.ToString(); 
                                     }
 
                                     if (objdata.data.articulolin[0].costemedio != objdata.newdata.costemedio)
@@ -1000,13 +1004,15 @@ namespace api.rebel_wings.Controllers
                                     var articulo = _articulosRespositoryBD2.GetAll().Where(ar => ar.Codarticulo == idartv).Select(s => new
                                     {
                                         marca = s.Marca,
-                                        nombre = s.Descripcion
+                                        nombre = s.Descripcion,
+                                        referencia = s.Refproveedor
                                     }).ToList();
                                     if (articulo.Count > 0)
                                     {
                                         var objmarca = _contextdb2.Marcas.Where(m => m.Codmarca == articulo[0].marca).FirstOrDefault();
                                         marca = objmarca == null ? "" : objmarca.Descripcion;
                                         nomart = articulo[0].nombre;
+                                        referencia = articulo[0].referencia; 
                                     }
 
                                     if (objdata.data[0].pneto != objdata.newdata.pbruto)
@@ -1047,6 +1053,7 @@ namespace api.rebel_wings.Controllers
                                     model.despues = item.valordespues;
                                     model.campo = item.campo;
                                     model.articulo = nomart;
+                                    model.referencia = referencia;
                                     listacambios.Add(model);
 
                                 }
@@ -1342,6 +1349,7 @@ namespace api.rebel_wings.Controllers
         public string antes { get; set; }
         public string despues { get; set; } 
         public string articulo { get; set; }
+        public string referencia { get; set; }  
 
     }
 

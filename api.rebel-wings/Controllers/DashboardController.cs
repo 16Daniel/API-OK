@@ -21,6 +21,7 @@ using System.IO.Pipes;
 using System.Linq;
 using biz.bd2.Models;
 using dal.rebel_wings.DBContext;
+using dal.bd2.DBContext;
 
 namespace api.rebel_wings.Controllers;
 /// <summary>
@@ -42,6 +43,7 @@ public class DashboardController : ControllerBase
     private readonly biz.rebel_wings.Repository.Implementacion.ITiemposRepository _tiemposRepository;
     private readonly biz.rebel_wings.Repository.Implementacion.I25ptsRepository _i25ptsRepository;
     private Db_Rebel_WingsContext _dbContext;
+    private BD2Context _bd2Context;
     private readonly JobReporteMensualTemp _job;
     /// <summary>
     /// Constructor
@@ -61,7 +63,8 @@ public class DashboardController : ControllerBase
         ITiemposRepository tiemposRepository,
         I25ptsRepository i25ptsRepository,
         IServiceScopeFactory serviceScopeFactory,
-        Db_Rebel_WingsContext dbcontext)
+        Db_Rebel_WingsContext dbcontext,
+        BD2Context bD2Context)
     {
         _dashboardRepository = dashboardRepository;
         _iRHTrabRepository = iRhTrabRepository;
@@ -75,6 +78,7 @@ public class DashboardController : ControllerBase
         _i25ptsRepository = i25ptsRepository;
         _job = new JobReporteMensualTemp(serviceScopeFactory);
         _dbContext = dbcontext;
+        _bd2Context = bD2Context;
 }
    /// <summary>
    /// GET:
@@ -935,4 +939,14 @@ public class DashboardController : ControllerBase
         }
         return StatusCode(201, response);
     }
+
+    [HttpGet]
+    [Route("validarConexion")]
+    public async Task<ActionResult> validarConexion()
+    {
+        var data1 = _dbContext.IT_25PTs.FirstOrDefault(); 
+        var data2 = _bd2Context.Albcompracabs.FirstOrDefault();
+        return StatusCode(StatusCodes.Status200OK, new { data1 = data1, data2 = data2 });
+    }
+
 }
