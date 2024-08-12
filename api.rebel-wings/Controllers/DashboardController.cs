@@ -42,6 +42,7 @@ public class DashboardController : ControllerBase
     private readonly biz.bd2.Repository.Sucursal.ISucursalRepository _sucursalDB2Repository;
     private readonly biz.rebel_wings.Repository.Implementacion.ITiemposRepository _tiemposRepository;
     private readonly biz.rebel_wings.Repository.Implementacion.I25ptsRepository _i25ptsRepository;
+    private readonly biz.rebel_wings.Repository.Implementacion.IMermaSucRepository _iMermaSucRepository;
     private Db_Rebel_WingsContext _dbContext;
     private BD2Context _bd2Context;
     private readonly JobReporteMensualTemp _job;
@@ -62,6 +63,7 @@ public class DashboardController : ControllerBase
         biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository,
         ITiemposRepository tiemposRepository,
         I25ptsRepository i25ptsRepository,
+        IMermaSucRepository mermaSucRepository,
         IServiceScopeFactory serviceScopeFactory,
         Db_Rebel_WingsContext dbcontext,
         BD2Context bD2Context)
@@ -79,6 +81,7 @@ public class DashboardController : ControllerBase
         _job = new JobReporteMensualTemp(serviceScopeFactory);
         _dbContext = dbcontext;
         _bd2Context = bD2Context;
+        _iMermaSucRepository = mermaSucRepository;
 }
    /// <summary>
    /// GET:
@@ -939,7 +942,37 @@ public class DashboardController : ControllerBase
         }
         return StatusCode(201, response);
     }
+    [HttpPost("envio_Mermas", Name = "envio_Mermas")]
+    [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ApiResponse<List<EnvioMermaSucDto>>>> envio_Mermas([FromBody] List<EnvioMermaSucDto> envioMermaSucsDtos)
+    {
+        var response = new ApiResponse<List<EnvioMermaSucDto>>();
+        try
+        {
+            var orders = new List<EnvioMermaSucDto>();
+            foreach (var envioMermaSucDto in envioMermaSucsDtos)
+            {
+                var order = await _iMermaSucRepository.AddAsyn(_mapper.Map<_MermaSuc>(envioMermaSucDto));
+                orders.Add(_mapper.Map<EnvioMermaSucDto>(order));
+            }
 
+
+            response.Result = orders;
+            response.Message = "Consult was success";
+            response.Success = true;
+         }
+        catch (Exception ex)
+        {
+                _logger.LogError(ex.Message);
+                response.Success = false;
+                response.Message = ex.ToString();
+                return StatusCode(500, response);
+        }
+        return StatusCode(201, response);
+    }
     [HttpGet]
     [Route("validarConexion")]
     public async Task<ActionResult> validarConexion()

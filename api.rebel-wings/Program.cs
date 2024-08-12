@@ -176,6 +176,7 @@ builder.Services.AddHostedService<JobNotificacionInventarioV>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();
+builder.Services.AddTransient<IMermaSucRepository, MermaSucsRepository>();
 builder.Services.AddTransient<IInventarioMensualRegistroRepository, InventarioMensualRegistroRepository>();
 builder.Services.AddTransient<IInventarioMensualRepository, InventarioMensualRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();

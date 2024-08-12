@@ -21,4 +21,5 @@ namespace biz.rebel_wings.Entities
 
         public string? Vendedor { get; set; } = null!;   
     }
+
 }

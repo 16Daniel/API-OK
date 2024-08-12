@@ -216,6 +216,7 @@ namespace api.rebel_wings.Mapper
             CreateMap<InventarioMensualRegistro, InventarioMensualRegistroDto>().ReverseMap();
             CreateMap<Tiempos, TiemposDto>().ReverseMap();
             CreateMap<_25pts, _25ptsDto>().ReverseMap();
+            CreateMap<_MermaSuc, _MermaSucDto>().ReverseMap();
             CreateMap<Mermas, MermasDto>().ReverseMap();
             CreateMap<Reporte, ReporteDto>().ReverseMap();
             CreateMap<Vendedor, VendedorDto>().ReverseMap();
