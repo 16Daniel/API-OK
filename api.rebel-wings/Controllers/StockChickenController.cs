@@ -128,6 +128,45 @@ namespace api.rebel_wings.Controllers
         /// </summary>
         /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
         /// <returns></returns>
+        [HttpGet("GetTipoInv", Name = "GetTipoInv")]
+        public ActionResult<ApiResponse<TipoInvDto>> GetTipoInv(int id_sucursal, string dataBase)
+        {
+            var response = new ApiResponse<TipoInvDto>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        response.Result = _mapper.Map<TipoInvDto>(_stockDB1Repository.GetTipoInv(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    case "DB2":
+                        response.Result = _mapper.Map<TipoInvDto>(_stockDB2Repository.GetTipoInv(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
         [HttpGet("GetStock", Name = "GetStock")]
         public ActionResult<ApiResponse<List<StockDto>>> GetStock(int id_sucursal, string dataBase)
         {

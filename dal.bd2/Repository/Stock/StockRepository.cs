@@ -24,35 +24,40 @@ namespace dal.bd2.Repository.Stock
             List<biz.bd2.Models.StockDto> _stock2 = new List<biz.bd2.Models.StockDto>();
             var timeNow = DateTime.Now;
             var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
-                if (serie != null)
-                {
-                    _stock = _context.Stocks
-                        .Join(_context.Articuloscamposlibres,
-                        art => art.Codarticulo,
-                        stk => stk.Codarticulo,
-                        (art, stk) => new biz.bd2.Models.StockDto()
-                        {
-                          Codalmacen = art.Codalmacen,
-                          Codarticulo = stk.Codarticulo,
-                          Regulariza = stk.Regulariza,
-                          Unidadessat = stk.Unidadessat,
-                          Unidadmedida = stk.UnidadMedida,
-                        })
-                        .Join(_context.Articulos1,
-                        art => art.Codarticulo,
-                        stk => stk.Codarticulo,
-                        (art, stk) => new biz.bd2.Models.StockDto()
-                        {
-                          Codalmacen = art.Codalmacen,
-                          Descripcion = stk.Descripcion,
-                          Codarticulo = art.Codarticulo,
-                          Regulariza = art.Regulariza,
-                          Unidadessat = art.Unidadessat,
-                          Unidadmedida = art.Unidadmedida,
-                        })
-                        .Where(s => s.Codalmacen == serie && s.Regulariza == "T").ToList();
+            if (serie != null)
+            {
+                _stock = _context.Stocks
+                    .Join(_context.Articuloscamposlibres,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        Regulariza = stk.Regulariza,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        RegularizaSemanal = stk.RegularizaSemanal,
+                        Orden = stk.Orden,
 
-                }
+                    })
+                    .Join(_context.Articulos1,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        Regulariza = art.Regulariza,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = stk.Unidadmedida,
+                        RegularizaSemanal = art.RegularizaSemanal,
+                        Orden = art.Orden,
+                    })
+                    .Where(s => s.Codalmacen == serie && s.RegularizaSemanal == "T").ToList();
+
+            }
                 if (timeNow.Hour < 3) {
 
                     _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha == DateTime.Now.Date.AddDays(-1) && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 3 && es.Tipo == "REG").Any()).ToList();
@@ -261,12 +266,12 @@ namespace dal.bd2.Repository.Stock
                     stk => stk.Codarticulo,
                     (art, stk) => new
                     {
-                      Codalmacen = art.Codalmacen,
-                      Codarticulo = stk.Codarticulo,
-                      Regulariza = stk.Regulariza,
-                      Unidadessat = stk.Unidadessat,
-                      Unidadmedida = stk.UnidadMedida,
-                      art.Stock1
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        RegularizaSemanal = stk.RegularizaSemanal,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        art.Stock1
 
                     })
                     .Join(_context.Articulos1,
@@ -274,15 +279,15 @@ namespace dal.bd2.Repository.Stock
                     stk => stk.Codarticulo,
                     (art, stk) => new
                     {
-                      Codalmacen = art.Codalmacen,
-                      Descripcion = stk.Descripcion,
-                      Codarticulo = art.Codarticulo,
-                      Regulariza = art.Regulariza,
-                      Unidadessat = art.Unidadessat,
-                      Unidadmedida = art.Unidadmedida,
-                      art.Stock1
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        RegularizaSemanal = art.RegularizaSemanal,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = art.Unidadmedida,
+                        art.Stock1
                     })
-                    .SingleOrDefault(s => s.Codalmacen == serie && s.Codarticulo == codarticulo && s.Regulariza == "T").Stock1.Value;
+                    .SingleOrDefault(s => s.Codalmacen == serie && s.Codarticulo == codarticulo && s.RegularizaSemanal == "T").Stock1.Value;
 
             }
 
@@ -1195,6 +1200,36 @@ namespace dal.bd2.Repository.Stock
             return reportes;
         }
 
+        public TipoInvDto GetTipoInv(int id_sucursal)
+        {
+            TipoInvDto reportes = new TipoInvDto();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_INV_TEORICO";
+            cmd.Parameters.Add("@SERIE", System.Data.SqlDbType.Int, 2).Value = id_sucursal;
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+
+                reportes.IdSucursal = (int)reader["IDFRONT"];
+
+            }
+            connection.Close();
+
+            if (reportes.IdSucursal != null)
+            {
+                return reportes;
+            }
+            else
+            {
+                reportes.IdSucursal = 0;
+                return reportes;
+            }
+
+        }
         public List<Apps> GetReporteApps(DateTime DateI, DateTime DateF)
         {
             List<Apps> reportes = new List<Apps>();

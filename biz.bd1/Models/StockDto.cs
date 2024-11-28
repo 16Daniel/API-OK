@@ -18,4 +18,9 @@ namespace biz.bd1.Models
         public DateTime? Ultfecha { get; set; }
         public string RegularizaSemanal { get; set; }
     }
+    public class TipoInvDto
+    {
+
+        public int? IdSucursal { get; set; }
+    }
 }

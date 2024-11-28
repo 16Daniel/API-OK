@@ -9,6 +9,7 @@ namespace biz.bd2.Repository.Stock
 {
     public interface IStockRepository : IGenericRepository<biz.bd2.Entities.Stock>
     {
+        biz.bd2.Models.TipoInvDto GetTipoInv(int id_sucursal);
         List<biz.bd2.Models.StockDto> GetStock(int id_sucursal);
         List<biz.bd2.Models.StockDto> GetStockV(int id_sucursal);
         List<biz.bd2.Models.StockDto> GetStockM(int id_sucursal);

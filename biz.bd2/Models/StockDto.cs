@@ -30,4 +30,10 @@ namespace biz.bd2.Models
          public int? orden { get; set; }
          public string? tipo { get; set; }
     }
+
+    public class TipoInvDto
+    {
+
+        public int? IdSucursal { get; set; }
+    }
 }

@@ -12,4 +12,9 @@ namespace api.rebel_wings.Models.Stock
         public string? InventarioMensual { get; set; }
         public int? Orden { get; set; }
     }
+    public class TipoInvDto
+    {
+
+        public int? IdSucursal { get; set; }
+    }
 }

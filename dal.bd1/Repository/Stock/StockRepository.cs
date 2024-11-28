@@ -1160,6 +1160,37 @@ namespace dal.bd1.Repository.Stock
             return reportes;
         }
 
+        public TipoInvDto GetTipoInv(int id_sucursal)
+        {
+            TipoInvDto reportes = new TipoInvDto();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_INV_TEORICO";
+            cmd.Parameters.Add("@SERIE", System.Data.SqlDbType.Int, 2).Value = id_sucursal;
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+               
+                reportes.IdSucursal = (int)reader["IDFRONT"];
+                
+            }
+            connection.Close();
+
+            if (reportes.IdSucursal != null)
+            {
+                return reportes;
+            }
+            else { 
+                reportes.IdSucursal = 0;
+                return reportes;
+            }
+
+        }
+
+
         public List<Ranking> GetRkg(string branch, DateTime initDate, DateTime endDate)
         {
             List<Ranking> reportes = new List<Ranking>();
