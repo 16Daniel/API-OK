@@ -241,7 +241,7 @@ namespace dal.bd2.Repository.Stock
                 select new getArticulo() { 
                     Descripcion = art.Descripcion,
                     stockAnt = ((decimal?)stk.Stock1),
-                    precio = ((decimal?)artlin.Preciocomprareal),
+                    precio = ((decimal?)artlin.Precioultcompra),
                     Referencia = art.Refproveedor,
                     Medida = art.Unidadmedida,
                     orden = tipo.Orden,
