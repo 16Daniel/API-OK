@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 using biz.bd2.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace dal.bd2.Repository.Stock
 {
     public class StockRepository : GenericRepository<biz.bd2.Entities.Stock>, IStockRepository
     {
-        public StockRepository(BD2Context context) : base(context)
+        private readonly IConfiguration _configuration;
+        public StockRepository(BD2Context context, IConfiguration configuration) : base(context)
         {
-
+            _configuration = configuration;
         }
         public List<biz.bd2.Models.StockDto> GetStock(int id_sucursal)
         {
@@ -88,8 +91,120 @@ namespace dal.bd2.Repository.Stock
                 }
 
              
+        }
 
-             
+        public List<biz.bd2.Models.StockDto> GetStockArtSemMat(int id_sucursal)
+        {   
+
+            List<int> codigos = new List<int>();
+            List<biz.bd2.Models.ArtInvSem> articulosbd = new List<biz.bd2.Models.ArtInvSem>();
+
+            var connectionString = _configuration.GetConnectionString("DBP");
+            using (SqlConnection conexion = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comando = new SqlCommand("GET_ARTICULOS_INV_SEMANAL", conexion))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    conexion.Open();
+
+                    using (SqlDataReader reader = comando.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // La columna se llama CODARTICULO
+                            int codigo = int.Parse(reader["CODARTICULO"].ToString());
+                            int orden = 0;
+                            if (reader["PRIORIDAD"] != DBNull.Value && Convert.ToBoolean(reader["PRIORIDAD"]))
+                            {
+                                orden = Convert.ToInt32(reader["PRIORIDAD"]);
+                            }
+                            codigos.Add(codigo); 
+                            articulosbd.Add(new biz.bd2.Models.ArtInvSem() { codarticulo = codigo, prioridad = orden} );
+                        }
+                    }
+                }
+            }
+
+            List<biz.bd2.Models.StockDto> _stock = new List<biz.bd2.Models.StockDto>();
+            List<biz.bd2.Models.StockDto> _stock2 = new List<biz.bd2.Models.StockDto>();
+            var timeNow = DateTime.Now.Date;
+            DateTime hora = DateTime.Now;   
+            var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
+            if (serie != null)
+            {
+                _stock = _context.Stocks
+                    .Join(_context.Articuloscamposlibres,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        Regulariza = stk.Regulariza,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        RegularizaSemanal = stk.RegularizaSemanal,
+                        Orden = stk.Orden,
+
+                    })
+                    .Join(_context.Articulos1,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        Regulariza = art.Regulariza,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = stk.Unidadmedida,
+                        RegularizaSemanal = art.RegularizaSemanal,
+                        Orden = art.Orden,
+                    })
+                    .Where(s => s.Codalmacen == serie && codigos.Contains(s.Codarticulo)).ToList();
+
+                foreach(var item in _stock) 
+                {
+                    item.Orden = articulosbd.Where(x => x.codarticulo == item.Codarticulo).FirstOrDefault().prioridad; 
+                }
+
+            }
+            if (hora.Hour < 3)
+            {
+                _stock = _stock.OrderBy(x=>x.Orden).ToList();
+                _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha.Value.Date == timeNow.AddDays(-1) && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 3 && es.Tipo == "REG").Any()).ToList();
+                _stock2 = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha.Value.Date == timeNow && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Tipo == "REG").Any()).ToList();
+                if (_stock.LongCount() > 0)
+                {
+
+                    if (_stock2.LongCount() > 0)
+                    {
+
+                        return _stock;
+
+                    }
+                    else
+                    {
+                        return _stock2;
+
+                    }
+
+                }
+                else
+                {
+
+                    return _stock;
+
+                }
+            }
+            else
+            {
+                _stock = _stock.OrderBy(x => x.Orden).ToList();
+                _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha.Value.Date == timeNow && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour >= 7 && es.Hora.Value.Hour < 17 && es.Tipo == "REG").Any()).ToList();
+                return _stock;
+            }
+
+
         }
 
         public String ObtenerAlmacen(int idsucursal)
@@ -165,6 +280,106 @@ namespace dal.bd2.Repository.Stock
 
 
         }
+
+        public List<biz.bd2.Models.StockDto> GetStockartSem(int id_sucursal)
+        {  
+            DateTime timeNow = DateTime.Now.Date;
+            List<int> codigos = new List<int>();
+            List<biz.bd2.Models.ArtInvSem> articulosbd = new List<biz.bd2.Models.ArtInvSem>();
+
+            var connectionString = _configuration.GetConnectionString("DBP");
+            using (SqlConnection conexion = new SqlConnection(connectionString))
+            {
+                using (SqlCommand comando = new SqlCommand("GET_ARTICULOS_INV_SEMANAL", conexion))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    conexion.Open();
+
+                    using (SqlDataReader reader = comando.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // La columna se llama CODARTICULO
+                            int codigo = int.Parse(reader["CODARTICULO"].ToString());
+                            int orden = 0;
+                            if (reader["PRIORIDAD"] != DBNull.Value && Convert.ToBoolean(reader["PRIORIDAD"]))
+                            {
+                                orden = Convert.ToInt32(reader["PRIORIDAD"]);
+                            }
+                            codigos.Add(codigo);
+                            articulosbd.Add(new biz.bd2.Models.ArtInvSem() { codarticulo = codigo, prioridad = orden });
+                        }
+                    }
+                }
+            }
+
+            List<biz.bd2.Models.StockDto> _stock = new List<biz.bd2.Models.StockDto>();
+            List<biz.bd2.Models.StockDto> _stock2 = new List<biz.bd2.Models.StockDto>();
+            var Hrs = DateTime.Now.Hour;
+            var ampm = Hrs >= 12 ? "PM" : "AM";
+
+            var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
+            if (serie != null)
+            {
+                _stock = _context.Stocks
+                    .Join(_context.Articuloscamposlibres,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        Regulariza = stk.Regulariza,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        RegularizaSemanal = stk.RegularizaSemanal,
+                        Orden = stk.Orden,
+
+                    })
+                    .Join(_context.Articulos1,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new biz.bd2.Models.StockDto()
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        Regulariza = art.Regulariza,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = stk.Unidadmedida,
+                        RegularizaSemanal = art.RegularizaSemanal,
+                        Orden = art.Orden,
+                    })
+                    .Where(s => s.Codalmacen == serie && codigos.Contains(s.Codarticulo)).ToList();
+
+                foreach (var item in _stock)
+                {
+                    item.Orden = articulosbd.Where(x => x.codarticulo == item.Codarticulo).FirstOrDefault().prioridad;
+                }
+
+            }
+            if (ampm.ToString().Equals("AM"))
+            {
+                _stock = _stock.OrderBy(x => x.Orden).ToList();
+                _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha.Value.Date == timeNow && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 1 && es.Hora.Value.Hour < 7 && es.Tipo == "REG").Any()).ToList();
+
+
+                return _stock;
+
+
+            }
+            else
+            {
+                _stock = _stock.OrderBy(x => x.Orden).ToList();
+                _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha.Value.Date == timeNow.AddDays(1) && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 1 && es.Hora.Value.Hour < 7 && es.Tipo == "REG").Any()).ToList();
+                return _stock;
+            }
+
+
+
+
+        }
+
 
         public List<biz.bd2.Models.StockDto> GetStockM(int id_sucursal)
         {
@@ -294,6 +509,46 @@ namespace dal.bd2.Repository.Stock
             return _stock;
         }
 
+        public decimal StockValidateArtSemMat(int id_sucursal, int codarticulo)
+        {
+            decimal _stock = 0;
+            var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
+            if (serie != null)
+            {
+                _stock = (decimal)_context.Stocks
+                    .Join(_context.Articuloscamposlibres,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        RegularizaSemanal = stk.RegularizaSemanal,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        art.Stock1
+
+                    })
+                    .Join(_context.Articulos1,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        RegularizaSemanal = art.RegularizaSemanal,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = art.Unidadmedida,
+                        art.Stock1
+                    })
+                    .SingleOrDefault(s => s.Codalmacen == serie && s.Codarticulo == codarticulo).Stock1.Value;
+
+            }
+
+            return _stock;
+        }
+
 
         public decimal StockValidateV(int id_sucursal, int codarticulo)
         {
@@ -335,15 +590,54 @@ namespace dal.bd2.Repository.Stock
             return _stock;
         }
 
+        public decimal StockValidateArtSemV(int id_sucursal, int codarticulo)
+        {
+            decimal _stock = 0;
+            var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
+            if (serie != null)
+            {
+                _stock = (decimal)_context.Stocks
+                    .Join(_context.Articuloscamposlibres,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Codarticulo = stk.Codarticulo,
+                        RegularizaSemanal = stk.RegularizaSemanal,
+                        Unidadessat = stk.Unidadessat,
+                        Unidadmedida = stk.UnidadMedida,
+                        art.Stock1
+
+                    })
+                    .Join(_context.Articulos1,
+                    art => art.Codarticulo,
+                    stk => stk.Codarticulo,
+                    (art, stk) => new
+                    {
+                        Codalmacen = art.Codalmacen,
+                        Descripcion = stk.Descripcion,
+                        Codarticulo = art.Codarticulo,
+                        RegularizaSemanal = art.RegularizaSemanal,
+                        Unidadessat = art.Unidadessat,
+                        Unidadmedida = art.Unidadmedida,
+                        art.Stock1
+                    })
+                    .SingleOrDefault(s => s.Codalmacen == serie && s.Codarticulo == codarticulo).Stock1.Value;
+
+            }
+
+            return _stock;
+        }
 
         public biz.bd2.Models.StockDto UpdateStock(int codArticulo, string codAlmacen, double cantidad)
         {
             biz.bd2.Models.StockDto _stock = new biz.bd2.Models.StockDto();
-
+            DateTime diaAsignado = DateTime.Now.Date; 
             //FECHA DE INVENTARIOS
             var tablaInv = DateTime.Now.Date.AddDays(-1);
-            if (_context.Inventarios.FirstOrDefault(x => x.Codalmacen == codAlmacen && x.Fecha == DateTime.Now.Date) != null) {
-              tablaInv  = _context.Inventarios.FirstOrDefault(x => x.Codalmacen == codAlmacen && x.Fecha == DateTime.Now.Date).Fecha;
+            if (_context.Inventarios.FirstOrDefault(x => x.Codalmacen == codAlmacen && x.Fecha.Date == diaAsignado) != null) {
+              tablaInv  = _context.Inventarios.FirstOrDefault(x => x.Codalmacen == codAlmacen && x.Fecha == diaAsignado).Fecha;
             }
             else { tablaInv = DateTime.Now.Date.AddDays(-1); }
 
@@ -361,9 +655,9 @@ namespace dal.bd2.Repository.Stock
                 _stock.Stock1 = cantidad;
 
                 _context.Stocks.Update(__stock);
-              if (tablaInv != DateTime.Now.Date) {
+              if (tablaInv != diaAsignado) {
                 biz.bd2.Entities.Inventario _inventario = new biz.bd2.Entities.Inventario();
-                _inventario.Fecha = DateTime.Now.Date;
+                _inventario.Fecha = diaAsignado;
                 _inventario.Codalmacen = codAlmacen;
                 _inventario.Tipovaloracion = -3;
                 _inventario.Serie = "";
@@ -393,7 +687,7 @@ namespace dal.bd2.Repository.Stock
                 _moviment.Talla = ".";
                 _moviment.Color = ".";
                 _moviment.Precio = _context.Articuloscamposlibres.FirstOrDefault(x => x.Codarticulo == codArticulo)?.Precioproveedor;
-                _moviment.Fecha = DateTime.Now.Date;
+                _moviment.Fecha = diaAsignado;
                 _moviment.Hora = Convert.ToDateTime("1899-12-30 " + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second + ".000");
                 _moviment.Codprocli = 0;
                 _moviment.Tipo = "REG";
@@ -1197,6 +1491,41 @@ namespace dal.bd2.Repository.Stock
             //return list3.OrderBy(x => x.Articulo).ThenBy(x => x.cod).ToList();
 
             
+            return reportes;
+        }
+
+
+        public List<Reporte> GetReporteArtSem(DateTime Date)
+        {
+            List<Reporte> reportes = new List<Reporte>();
+            SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
+            SqlCommand cmd = connection.CreateCommand();
+            connection.Open();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.CommandText = "SPS_INV_VESP_REPORTE_ARTSEM";
+            cmd.Parameters.Add("@FECHA", System.Data.SqlDbType.VarChar, 10).Value = Date.ToString("dd/MM/yyyy");
+            cmd.CommandTimeout = 120;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                Reporte repp = new Reporte();
+                repp.cod = (string)reader["COD"];
+                repp.Region = (string)reader["REGION"];
+                repp.Sucursal = (string)reader["SUCURSAL"];
+                repp.Articulo = (string)reader["ARTICULO"];
+                repp.Seccion = (string)reader["SECCION"];
+                repp.InvAyer = (string)reader["INVAYER"];
+                repp.ConsumoAyer = (double)reader["CONSUMOAYER"];
+                repp.TraspasoAyer = (double)reader["TRASPASOAYER"];
+                repp.InvHoy = (string)reader["INVHOY"];
+                repp.Captura = (DateTime)reader["CAPTURA"];
+                repp.InvFormula = (double)reader["INVFORMULA"];
+                repp.Diferencia = (double)reader["DIFERENCIA"];
+                repp.Mermasayer = (double)reader["MERMASAYER"];
+                reportes.Add(repp);
+            }
+            connection.Close();
+  
             return reportes;
         }
 

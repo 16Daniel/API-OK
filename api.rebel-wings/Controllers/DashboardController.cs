@@ -675,6 +675,33 @@ public class DashboardController : ControllerBase
         return StatusCode(200, response);
     }
 
+    [HttpGet("performance-reporte-ArtSem/{city:int}")]
+    [ServiceFilter(typeof(ValidationFilterAttribute))]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public ActionResult<ApiResponse<List<ReporteDto>>> GetPerformanceReporteArtSemV(int city, [FromQuery] DateTime initDate)
+    {
+        var response = new ApiResponse<List<ReporteDto>>();
+        try
+        {
+            response.Result = _mapper.Map<List<ReporteDto>>(
+                      _stockDB2Repository.GetReporteArtSem(initDate.AbsoluteStart()));
+
+            response.Success = true;
+            response.Message = "Operation was success";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            response.Success = false;
+            response.Message = ex.ToString();
+            return StatusCode(500, response);
+        }
+
+        return StatusCode(200, response);
+    }
+
+
     [HttpGet("performance-reporte-apps")]
     [ServiceFilter(typeof(ValidationFilterAttribute))]
     [ProducesResponseType(StatusCodes.Status200OK)]
