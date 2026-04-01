@@ -201,6 +201,28 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetStockArtSemMat", Name = "GetStockArtSemMat")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockArtSemMat(int id_sucursal, string dataBase)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            dataBase = "DB2"; 
+            try
+            {
+                response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockArtSemMat(id_sucursal));
+                response.Message = "success";
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
         /// <summary>
         /// GET para retornar catálogo de articulos para stock de pollo
         /// </summary>
@@ -221,13 +243,36 @@ namespace api.rebel_wings.Controllers
                         response.Message = "success";
                         break;
                     case "DB2":
-                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockV(id_sucursal));
+                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStock(id_sucursal));
                         response.Message = "success";
                         break;
                     default:
 
                         break;
                 }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("GetStockArtSemV", Name = "GetStockArtSemV")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockArtSemV(int id_sucursal, string dataBase)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<StockDto>>();
+
+            try
+            {
+                response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockartSem(id_sucursal));
+                response.Message = "success";
             }
             catch (Exception ex)
             {
@@ -359,6 +404,77 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        [HttpGet("ValidateStockArtSemMat", Name = "ValidateStockArtSemMat")]
+        public ActionResult<ApiResponse<List<StockDto>>> ValidateStockartSemMat(int id_sucursal, string dataBase, decimal cantidad, int codarticulo)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            decimal _cantidad = 0;
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        if (_stockDB1Repository.StockValidate(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB1Repository.StockValidate(id_sucursal, codarticulo) + cantidad;
+
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB1Repository.StockValidate(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = "" + _cantidad;
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = "" + _cantidad;
+                        }
+                        break;
+                    case "DB2":
+                        if (_stockDB2Repository.StockValidateArtSemMat(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemMat(id_sucursal, codarticulo) + cantidad;
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemMat(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = _cantidad.ToString();
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = _cantidad.ToString();
+                        }
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
 
         /// <summary>
         /// GET para validar stock de pollo con la base ICG
@@ -400,13 +516,13 @@ namespace api.rebel_wings.Controllers
                         }
                         break;
                     case "DB2":
-                        if (_stockDB2Repository.StockValidateV(id_sucursal, codarticulo) < 0)
+                        if (_stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) < 0)
                         {
-                            _cantidad = _stockDB2Repository.StockValidateV(id_sucursal, codarticulo) + cantidad;
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) + cantidad;
                         }
                         else
                         {
-                            _cantidad = _stockDB2Repository.StockValidateV(id_sucursal, codarticulo) - cantidad;
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) - cantidad;
                         }
 
                         _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
@@ -438,6 +554,76 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        [HttpGet("ValidateStockArtSemV", Name = "ValidateStockArtSemV")]
+        public ActionResult<ApiResponse<List<StockDto>>> ValidateStockArtSemV(int id_sucursal, string dataBase, decimal cantidad, int codarticulo)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            decimal _cantidad = 0;
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        if (_stockDB1Repository.StockValidateV(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB1Repository.StockValidateV(id_sucursal, codarticulo) + cantidad;
+
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB1Repository.StockValidateV(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = "" + _cantidad;
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = "" + _cantidad;
+                        }
+                        break;
+                    case "DB2":
+                        if (_stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) + cantidad;
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = _cantidad.ToString();
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = _cantidad.ToString();
+                        }
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
 
         /// <summary>
         /// POST Para actualizar Stock y hacer regularizacion en ICG
