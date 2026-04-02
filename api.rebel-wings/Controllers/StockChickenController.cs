@@ -1429,6 +1429,7 @@ namespace api.rebel_wings.Controllers
 
         /// <summary>
         /// GET para retornar catálogo de articulos para stock de pollo
+        /// GET PARA GENERAR LA REGULARIZACION Y ENVIO DEL CORREO
         /// </summary>
         /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
         /// <returns></returns>
@@ -1468,6 +1469,45 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// GET REENVIO DE CORREO DE UN INVENTARIO
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetEnvioCorreo", Name = "GetEnvioCorreo")]
+        public ActionResult<ApiResponse<List<InventarioMensualDto>>> GetEnvioCorreo(int registro, string dataBase, string sucursal, string correo, int idsucursal)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<InventarioMensualDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturasExcel(registro, sucursal, correo));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
 
         [HttpPost]
         [Route("GuardarubicacionesInventario")]
