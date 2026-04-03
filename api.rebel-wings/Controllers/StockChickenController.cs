@@ -243,7 +243,7 @@ namespace api.rebel_wings.Controllers
                         response.Message = "success";
                         break;
                     case "DB2":
-                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStock(id_sucursal));
+                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockV(id_sucursal));
                         response.Message = "success";
                         break;
                     default:
