@@ -338,12 +338,10 @@ public class InventarioMensualRepository : GenericRepository<biz.rebel_wings.Ent
 
         ////servicio
         mensaje.To.Add("jose.r@operamx.com");
-        mensaje.To.Add("eduardo.p@operamx.com");
         mensaje.To.Add("christopher.m@operamx.com");
-        mensaje.To.Add("monica.r@operamx.com");
-        mensaje.To.Add("sergio.g@operamx.com");
         mensaje.To.Add("daniel.h@operamx.com");
-        mensaje.To.Add("edith.h@operamx.com"); 
+        mensaje.To.Add("edith.h@operamx.com");
+        mensaje.To.Add("israel.f@operamx.com"); 
 
         // mensaje.To.Add("arturo.m@operamx.com");
 

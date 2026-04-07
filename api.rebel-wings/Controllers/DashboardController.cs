@@ -679,13 +679,13 @@ public class DashboardController : ControllerBase
     [ServiceFilter(typeof(ValidationFilterAttribute))]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult<ApiResponse<List<ReporteDto>>> GetPerformanceReporteArtSemV(int city, [FromQuery] DateTime initDate, [FromQuery] string region)
+    public ActionResult<ApiResponse<List<ReporteDto>>> GetPerformanceReporteArtSemV(int city, [FromQuery] DateTime initDate)
     {
         var response = new ApiResponse<List<ReporteDto>>();
         try
         {
             response.Result = _mapper.Map<List<ReporteDto>>(
-                      _stockDB2Repository.GetReporteArtSem(initDate.AbsoluteStart(),region));
+                      _stockDB2Repository.GetReporteArtSem(initDate.AbsoluteStart()));
 
             response.Success = true;
             response.Message = "Operation was success";

@@ -1495,7 +1495,7 @@ namespace dal.bd2.Repository.Stock
         }
 
 
-        public List<Reporte> GetReporteArtSem(DateTime Date,string region)
+        public List<Reporte> GetReporteArtSem(DateTime Date)
         {
             List<Reporte> reportes = new List<Reporte>();
             SqlConnection connection = (SqlConnection)_context.Database.GetDbConnection();
@@ -1504,7 +1504,6 @@ namespace dal.bd2.Repository.Stock
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.CommandText = "SPS_INV_VESP_REPORTE_ARTSEM";
             cmd.Parameters.Add("@FECHA", System.Data.SqlDbType.VarChar, 10).Value = Date.ToString("dd/MM/yyyy");
-            cmd.Parameters.Add("@GRUPO", System.Data.SqlDbType.VarChar, 255).Value = region; 
             cmd.CommandTimeout = 3600;
             SqlDataReader reader = cmd.ExecuteReader();
             while (reader.Read())
