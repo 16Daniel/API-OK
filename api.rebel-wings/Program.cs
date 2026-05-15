@@ -88,6 +88,7 @@ using biz.rebel_wings.Repository.Ticket;
 using biz.rebel_wings.Repository.Ticketing;
 using biz.rebel_wings.Repository.TicketTable;
 using biz.rebel_wings.Repository.WashBasinWithSoapPaper;
+using biz.rebel_wings.Repository.InventarioMensual;
 using dal.bd1.Repository.Albaran;
 using dal.bd1.Repository.Remision;
 using dal.rebel_wings.Repository.Albaran;
@@ -119,12 +120,13 @@ using dal.rebel_wings.Repository.Spotlight;
 using dal.rebel_wings.Repository.Station;
 using dal.rebel_wings.Repository.Stock;
 using dal.rebel_wings.Repository.Implementacion;
+using dal.rebel_wings.Repository.InventarioMensual;
 using dal.rebel_wings.Repository.Task;
 using dal.rebel_wings.Repository.Ticket;
 using dal.rebel_wings.Repository.Ticketing;
 using dal.rebel_wings.Repository.TicketTable;
 using dal.rebel_wings.Repository.WashBasinWithSoapPaper;
-
+using api.rebel_wings.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -167,9 +169,16 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
+builder.Services.AddHostedService<JobReporteMensualTemp>();
+builder.Services.AddHostedService<JobUltimaActualizacion>();
+builder.Services.AddHostedService<JobNotificacionInventario>();
+builder.Services.AddHostedService<JobNotificacionInventarioV>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();
+builder.Services.AddTransient<IMermaSucRepository, MermaSucsRepository>();
+builder.Services.AddTransient<IInventarioMensualRegistroRepository, InventarioMensualRegistroRepository>();
+builder.Services.AddTransient<IInventarioMensualRepository, InventarioMensualRepository>();
 builder.Services.AddTransient<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IRoleRepository, RoleRepository>();
 builder.Services.AddTransient<IPermissionRepository, PermissionRepository>();
@@ -373,3 +382,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+

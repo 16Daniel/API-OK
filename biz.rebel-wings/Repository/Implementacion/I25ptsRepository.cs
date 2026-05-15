@@ -7,5 +7,7 @@ namespace biz.rebel_wings.Repository.Implementacion
     {
         List<biz.rebel_wings.Models.Implementacion._25ptsList> Get25pts(string branch, DateTime initDate, DateTime endDate);
         List<biz.rebel_wings.Models.Implementacion.sucAudita> GetGrafica25pts(string branch, DateTime initDate, DateTime endDate);
+        
     }
+
 }

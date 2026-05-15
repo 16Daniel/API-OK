@@ -5,6 +5,7 @@ using api.rebel_wings.Models.RequestTransfer;
 using api.rebel_wings.Models.SalesExpectations;
 using api.rebel_wings.Models.Stock;
 using api.rebel_wings.Models.User;
+using api.rebel_wings.Models.InventarioMensual;
 using AutoMapper;
 using biz.fortia.Repository.RH;
 using biz.rebel_wings.Entities;
@@ -14,8 +15,11 @@ using biz.rebel_wings.Repository.Stock;
 using biz.rebel_wings.Repository.User;
 using biz.rebel_wings.Services.Logger;
 using Microsoft.AspNetCore.Mvc;
+using biz.rebel_wings.Repository.InventarioMensual;
 using Newtonsoft.Json;
 using biz.rebel_wings.Repository;
+using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace api.rebel_wings.Controllers
 {
@@ -40,6 +44,10 @@ namespace api.rebel_wings.Controllers
         private readonly biz.bd2.Repository.Stock.IStockRepository _stockDB2Repository;
         private readonly IStockRepository _stockRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IInventarioMensualRepository _inventarioMensualRepository;
+        private readonly IInventarioMensualRegistroRepository _inventarioMensualRegistroRepository;
+        private readonly IConfiguration _configuration;
+        public string defaultconnectionString = "";
         /// <summary>
         /// Contructor
         /// </summary>
@@ -47,12 +55,16 @@ namespace api.rebel_wings.Controllers
         /// <param name="salesExpectationRepository"></param>
         /// <param name="stockChickeUsedRepository"></param>
         /// <param name="stockChickenByBranchRepository"></param>
+        /// <param name="inventarioMensualRepository"></param>
+        /// <param name="inventarioMensualRegistroRepository"></param>
         /// <param name="mapper"></param>
         /// <param name="logger"></param>
         /// <param name="iRhTrabRepository"></param>
         public StockChickenController(
             ICatStatusStockChickenRepository catStatusSalesExpectationRepository,
             IStockChickenRepository salesExpectationRepository,
+            IInventarioMensualRepository inventarioMensualRepository,
+            IInventarioMensualRegistroRepository inventarioMensualRegistroRepository,
             IMapper mapper,
             ILoggerManager logger,
             IStockChickeUsedRepository stockChickeUsedRepository,
@@ -62,7 +74,7 @@ namespace api.rebel_wings.Controllers
             biz.bd2.Repository.Sucursal.ISucursalRepository sucursalDB2Repository,
             biz.bd1.Repository.Stock.IStockRepository stockDB1Repository,
             biz.bd2.Repository.Stock.IStockRepository stockDB2Repository,
-            IStockRepository stockRepository, IUserRepository userRepository)
+            IStockRepository stockRepository, IUserRepository userRepository, IConfiguration configuration)
         {
             _logger = logger;
             _mapper = mapper;
@@ -77,6 +89,11 @@ namespace api.rebel_wings.Controllers
             _stockDB2Repository = stockDB2Repository;
             _stockRepository = stockRepository;
             _userRepository = userRepository;
+            _inventarioMensualRegistroRepository = inventarioMensualRegistroRepository;
+            _inventarioMensualRepository = inventarioMensualRepository;
+            _configuration = configuration;
+            defaultconnectionString = _configuration.GetConnectionString("DefaultConnection");
+
         }
         /// <summary>
         /// GET para retornar por ID Expectativa de Venta
@@ -104,6 +121,45 @@ namespace api.rebel_wings.Controllers
                 return StatusCode(500, response);
             }
             return StatusCode(200, response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetTipoInv", Name = "GetTipoInv")]
+        public ActionResult<ApiResponse<TipoInvDto>> GetTipoInv(int id_sucursal, string dataBase)
+        {
+            var response = new ApiResponse<TipoInvDto>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        response.Result = _mapper.Map<TipoInvDto>(_stockDB1Repository.GetTipoInv(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    case "DB2":
+                        response.Result = _mapper.Map<TipoInvDto>(_stockDB2Repository.GetTipoInv(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
         }
 
         /// <summary>
@@ -145,6 +201,28 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetStockArtSemMat", Name = "GetStockArtSemMat")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockArtSemMat(int id_sucursal, string dataBase)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            dataBase = "DB2"; 
+            try
+            {
+                response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockArtSemMat(id_sucursal));
+                response.Message = "success";
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
         /// <summary>
         /// GET para retornar catálogo de articulos para stock de pollo
         /// </summary>
@@ -153,6 +231,7 @@ namespace api.rebel_wings.Controllers
         [HttpGet("GetStockV", Name = "GetStockV")]
         public ActionResult<ApiResponse<List<StockDto>>> GetStockV(int id_sucursal, string dataBase)
         {
+            dataBase = "DB2";
             var response = new ApiResponse<List<StockDto>>();
 
             try
@@ -165,6 +244,69 @@ namespace api.rebel_wings.Controllers
                         break;
                     case "DB2":
                         response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockV(id_sucursal));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpGet("GetStockArtSemV", Name = "GetStockArtSemV")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockArtSemV(int id_sucursal, string dataBase)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<StockDto>>();
+
+            try
+            {
+                response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockartSem(id_sucursal));
+                response.Message = "success";
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetStockM", Name = "GetStockM")]
+        public ActionResult<ApiResponse<List<StockDto>>> GetStockM(int id_sucursal, string dataBase)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<StockDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockM(id_sucursal));
                         response.Message = "success";
                         break;
                     default:
@@ -262,6 +404,77 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        [HttpGet("ValidateStockArtSemMat", Name = "ValidateStockArtSemMat")]
+        public ActionResult<ApiResponse<List<StockDto>>> ValidateStockartSemMat(int id_sucursal, string dataBase, decimal cantidad, int codarticulo)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            decimal _cantidad = 0;
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        if (_stockDB1Repository.StockValidate(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB1Repository.StockValidate(id_sucursal, codarticulo) + cantidad;
+
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB1Repository.StockValidate(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = "" + _cantidad;
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = "" + _cantidad;
+                        }
+                        break;
+                    case "DB2":
+                        if (_stockDB2Repository.StockValidateArtSemMat(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemMat(id_sucursal, codarticulo) + cantidad;
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemMat(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = _cantidad.ToString();
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = _cantidad.ToString();
+                        }
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
 
         /// <summary>
         /// GET para validar stock de pollo con la base ICG
@@ -303,13 +516,13 @@ namespace api.rebel_wings.Controllers
                         }
                         break;
                     case "DB2":
-                        if (_stockDB2Repository.StockValidateV(id_sucursal, codarticulo) < 0)
+                        if (_stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) < 0)
                         {
-                            _cantidad = _stockDB2Repository.StockValidateV(id_sucursal, codarticulo) + cantidad;
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) + cantidad;
                         }
                         else
                         {
-                            _cantidad = _stockDB2Repository.StockValidateV(id_sucursal, codarticulo) - cantidad;
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) - cantidad;
                         }
 
                         _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
@@ -341,6 +554,76 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        [HttpGet("ValidateStockArtSemV", Name = "ValidateStockArtSemV")]
+        public ActionResult<ApiResponse<List<StockDto>>> ValidateStockArtSemV(int id_sucursal, string dataBase, decimal cantidad, int codarticulo)
+        {
+            var response = new ApiResponse<List<StockDto>>();
+            decimal _cantidad = 0;
+            try
+            {
+                switch (dataBase)
+                {
+                    case "DB1":
+                        if (_stockDB1Repository.StockValidateV(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB1Repository.StockValidateV(id_sucursal, codarticulo) + cantidad;
+
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB1Repository.StockValidateV(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = "" + _cantidad;
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = "" + _cantidad;
+                        }
+                        break;
+                    case "DB2":
+                        if (_stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) < 0)
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) + cantidad;
+                        }
+                        else
+                        {
+                            _cantidad = _stockDB2Repository.StockValidateArtSemV(id_sucursal, codarticulo) - cantidad;
+                        }
+
+                        _cantidad = _cantidad < 0 ? _cantidad * -1 : _cantidad;
+                        if (_cantidad >= 10)
+                        {
+                            response.Success = true;
+                            response.Message = _cantidad.ToString();
+                        }
+                        else
+                        {
+                            response.Success = false;
+                            response.Message = _cantidad.ToString();
+                        }
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
 
         /// <summary>
         /// POST Para actualizar Stock y hacer regularizacion en ICG
@@ -420,6 +703,57 @@ namespace api.rebel_wings.Controllers
             return Ok(response);
         }
 
+        /// <summary>
+        /// POST Para actualizar Stock y hacer regularizacion en ICG
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("AddRegularizateMensual", Name = "AddRegularizateMensual")]
+        public ActionResult<ApiResponse<StockDto>> AddRegularizateMensual(int registro, int idsucursal)
+        {
+            var response = new ApiResponse<StockDto>();
+
+            try
+            {
+                var capturas = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturas(registro));
+                var procesado = false;
+                var codAlmacen = _mapper.Map<String>(_stockDB2Repository.ObtenerAlmacen(idsucursal));
+                var contador = 0;
+                foreach (var item in capturas)
+                {
+                    procesado = _mapper.Map<Boolean>(_stockDB2Repository.UpdateStockInv(item.Codarticulo, codAlmacen, ((double)item.Unidades.Value)));
+                    if (procesado == true)
+                    {
+                        //actualizar registro a procesado
+                        var actualizado = _mapper.Map<Boolean>(_inventarioMensualRepository.procesadoCapturas(item.Id));
+                        if(actualizado == true) { contador += 1; }
+                    }
+                }
+                if (capturas.Count() == contador)
+                {
+                    var registroProcesado = _mapper.Map<Boolean>(_inventarioMensualRegistroRepository.procesadoRegistro(registro));
+                    if (registroProcesado == true)
+                    {
+                        response.Message = "success";
+                    }
+                }
+                else {
+                    response.Message = "incomplete";
+                }
+                        
+                       
+
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
 
         [HttpGet("{id}/Sales-Expectation")]
         [ServiceFilterAttribute(typeof(ValidationFilterAttribute))]
@@ -927,8 +1261,483 @@ namespace api.rebel_wings.Controllers
         private static string FormattedAmount(decimal _amount)
         {
             return $"{_amount:C}";
-        }  
-        
+        }
+
+        /// <summary>
+        /// POST Para generar nuevo registro de inventario
+        /// </summary>
+
+        [HttpPost("AddRegistro", Name = "AddRegistro")]
+        public ActionResult<ApiResponse<InventarioMensualRegistroDto>> AddRegistro(int city, int sucursal, string captura)
+        {
+            var response = new ApiResponse<InventarioMensualRegistroDto>();
+
+            try
+            {
+                
+                       
+                        response.Result = _mapper.Map<InventarioMensualRegistroDto>(_inventarioMensualRegistroRepository.CreaRegistro(city, sucursal, captura));
+                        response.Message = "success";
+               
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar numero de registro pendiente de procesar
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("GetRegistro", Name = "GetRegistro")]
+        public ActionResult<ApiResponse<InventarioMensualRegistroDto>> GetRegistro(int id_sucursal)
+        {
+            
+            var response = new ApiResponse<InventarioMensualRegistroDto>();
+
+            try
+            {
+                
+                response.Result = _mapper.Map<InventarioMensualRegistroDto>(_inventarioMensualRegistroRepository.GetRegistro(id_sucursal));
+                response.Message = "success";
+                       
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// POST Para generar nuevo registro de inventario
+        /// </summary>
+
+        [HttpPost("AddCaptura", Name = "AddCaptura")]
+        public ActionResult<ApiResponse<InventarioMensualDto>> AddCaptura(int city, int sucursal, int codarticulo, decimal unidades, string codAlmacen, int registro)
+        {
+            var response = new ApiResponse<InventarioMensualDto>();
+
+            try
+            {
+                var art = _stockDB2Repository.GetStockArticulo(sucursal, codarticulo, codAlmacen);
+
+                response.Result = _mapper.Map<InventarioMensualDto>(_inventarioMensualRepository.CreaCaptura(city, sucursal, codarticulo, unidades, art.precio, art.stockAnt,art.Referencia,art.Medida, art.Descripcion, registro, art.orden, art.tipo));
+                response.Message = "success";
+
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetCaptura", Name = "GetCaptura")]
+        public ActionResult<ApiResponse<List<InventarioMensualDto>>> GetCaptura(int registro, string dataBase)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<InventarioMensualDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturas(registro));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+
+        [HttpPut("ModificaCaptura", Name = "ModificaCaptura")]
+        public ActionResult<ApiResponse<InventarioMensualDto>> ModCaptura(int idcaptura, string dataBase, decimal unidades)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<InventarioMensualDto>();
+
+            try
+            {
+                
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<InventarioMensualDto>(_inventarioMensualRepository.modificaCapturas(idcaptura, unidades));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET para retornar catálogo de articulos para stock de pollo
+        /// GET PARA GENERAR LA REGULARIZACION Y ENVIO DEL CORREO
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetExcel", Name = "GetExcel")]
+        public ActionResult<ApiResponse<List<InventarioMensualDto>>> GetExcel(int registro, string dataBase, string sucursal, string correo, int idsucursal)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<InventarioMensualDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturasExcel(registro, sucursal, correo));
+                        response.Message = "success";
+                        AddRegularizateMensual(registro, idsucursal);
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// GET REENVIO DE CORREO DE UN INVENTARIO
+        /// </summary>
+        /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
+        /// <returns></returns>
+        [HttpGet("GetEnvioCorreo", Name = "GetEnvioCorreo")]
+        public ActionResult<ApiResponse<List<InventarioMensualDto>>> GetEnvioCorreo(int registro, string dataBase, string sucursal, string correo, int idsucursal)
+        {
+            dataBase = "DB2";
+            var response = new ApiResponse<List<InventarioMensualDto>>();
+
+            try
+            {
+                switch (dataBase)
+                {
+                    //case "DB1":
+                    //    response.Result = _mapper.Map<List<StockDto>>(_stockDB1Repository.GetStockM(id_sucursal));
+                    //    response.Message = "success";
+                    //    break;
+                    case "DB2":
+                        response.Result = _mapper.Map<List<InventarioMensualDto>>(_inventarioMensualRepository.getCapturasExcel(registro, sucursal, correo));
+                        response.Message = "success";
+                        break;
+                    default:
+
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Result = null;
+                response.Success = false;
+                response.Message = ex.ToString();
+                _logger.LogError($"Something went wrong: {ex.ToString()}");
+                return StatusCode(500, response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("GuardarubicacionesInventario")]
+        public IActionResult guardarubicaciones([FromBody] addubicacioninventarioModel model)
+        {
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("GUARDAR_UBICACIONES_INVENTARIO", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Agregar parámetros
+                    command.Parameters.Add(new SqlParameter("@CODART", model.codart));
+                    command.Parameters.Add(new SqlParameter("@JADATA", model.jdata));
+                    command.Parameters.Add(new SqlParameter("@IDU", model.idu));
+                    command.Parameters.Add(new SqlParameter("@IDS", model.ids));
+                    command.Parameters.Add(new SqlParameter("@VISTA", model.vista));
+                    command.Parameters.Add(new SqlParameter("@TOTAL", model.total));
+
+                    try
+                    {
+                        // Abrir la conexión
+                        connection.Open();
+
+                        // Ejecutar el procedimiento almacenado
+                        command.ExecuteNonQuery();
+
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message });
+                    }
+                }
+            }
+
+        }
+
+
+        [HttpGet]
+        [Route("getUbicacionesInventario")]
+        public IActionResult getUbicaciones()
+        {
+            List<UbicacionesModel> lista = new List<UbicacionesModel>();
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("GET_UBICACIONES_INVENTARIO", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                lista.Add(new UbicacionesModel
+                                {
+                                    id = (int)reader["ID"],
+                                    codart = (int)reader["CODART"],
+                                    jdata = (string)reader["JDATA"],
+                                    idu = (string)reader["IDUSUARIO"],
+                                    ids = (string)reader["IDSUCURSAL"],
+                                    vista = (int)reader["VISTA"],
+                                    total = (double)reader["TOTAL"]
+                                });
+                            }
+                        }
+
+                        return StatusCode(StatusCodes.Status200OK, lista); 
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
+                        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                    }
+                }
+            }
+
+        }
+
+
+
+        [HttpGet]
+        [Route("getUbicacionesInventarioMensual")]
+        public IActionResult getUbicacionesMensual()
+        {
+            List<UbicacionesModel> lista = new List<UbicacionesModel>();
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("GET_UBICACIONES_INVENTARIO_MENSUAL", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    try
+                    {
+                        connection.Open();
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                lista.Add(new UbicacionesModel
+                                {
+                                    id = (int)reader["ID"],
+                                    codart = (int)reader["CODART"],
+                                    jdata = (string)reader["JDATA"],
+                                    idu = (string)reader["IDUSUARIO"],
+                                    ids = (string)reader["IDSUCURSAL"],
+                                    vista = (int)reader["VISTA"],
+                                    total = (double)reader["TOTAL"]
+                                });
+                            }
+                        }
+
+                        return StatusCode(StatusCodes.Status200OK, lista);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error: " + ex.Message);
+                        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                    }
+                }
+            }
+
+        }
+
+
+        [HttpGet]
+        [Route("EliminarUbicacionesInventario/{id}")]
+        public IActionResult eliminarubicaciones(int id)
+        {
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("ELIMINAR_UBICACIONES_INVENTARIO", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Agregar parámetros
+                    command.Parameters.Add(new SqlParameter("@ID", id));
+
+                    try
+                    {
+                        // Abrir la conexión
+                        connection.Open();
+
+                        // Ejecutar el procedimiento almacenado
+                        command.ExecuteNonQuery();
+
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message });
+                    }
+                }
+            }
+
+        }
+
+        [HttpGet]
+        [Route("EliminarUbicacionesInventarioMensual/{idsuc}/{idu}")]
+        public IActionResult eliminarubicacionesMensual(int idsuc, int idu)
+        {
+
+            using (SqlConnection connection = new SqlConnection(defaultconnectionString))
+            {
+                using (SqlCommand command = new SqlCommand("ELIMINAR_UBICACIONES_INVENTARIO_MENSUAL", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    // Agregar parámetros
+                    command.Parameters.Add(new SqlParameter("@IDSUC", idsuc));
+                    command.Parameters.Add(new SqlParameter("@IDUSUARIO", idu));
+
+                    try
+                    {
+                        // Abrir la conexión
+                        connection.Open();
+
+                        // Ejecutar el procedimiento almacenado
+                        command.ExecuteNonQuery();
+
+                        return StatusCode(StatusCodes.Status200OK);
+                    }
+                    catch (Exception ex)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { error = ex.Message });
+                    }
+                }
+            }
+
+        }
+
+        [HttpGet]
+        [Route("getFechaServidor")]
+        public IActionResult getFechaServidor()
+        {
+            DateTime fecha = DateTime.Now.Date;
+            return StatusCode(StatusCodes.Status200OK, new { date = fecha, success = true });
+        }
+
+      
+
+    }
+
+    public class addubicacioninventarioModel 
+    {
+        public int codart { get; set; }
+        public string jdata { get; set; }
+        public string idu { get; set; }
+        public string ids { get; set; }
+        public int vista { get; set; }  
+        public double total { get; set; }
+    
+    }
+
+    public class UbicacionesModel
+    {
+        public int id { get; set; }
+        public int codart { get; set; }
+        public string jdata { get; set; }
+        public string idu { get; set; }
+        public string ids { get; set; }
+        public int vista { get; set; }
+        public double total { get; set; }
     }
 
 }

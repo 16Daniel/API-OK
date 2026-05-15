@@ -5,4 +5,5 @@
         public int Idfront { get; set; }
         public string Titulo { get; set; }
     }
+
 }
