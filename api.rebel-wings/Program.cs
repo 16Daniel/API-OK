@@ -134,14 +134,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var connectionStringFortia = builder.Configuration.GetConnectionString("Fortia");
-var connectionStringDB1 = builder.Configuration.GetConnectionString("DB1");
-var connectionStringBD2 = builder.Configuration.GetConnectionString("DB2");
-builder.Services.AddDbContext<Db_Rebel_WingsContext>(options => options.UseSqlServer(connectionString))
-    .AddDbContext<BDFORTIAContext>(options => options.UseSqlServer(connectionStringFortia))
-    .AddDbContext<BD1Context>(options => options.UseSqlServer(connectionStringDB1))
-    .AddDbContext<BD2Context>(options => options.UseSqlServer(connectionStringBD2));
+var RebelWingsConnection = builder.Configuration.GetConnectionString("RebelWingsConnection");
+var FortiaConnection = builder.Configuration.GetConnectionString("FortiaConnection");
+var DB1Connection = builder.Configuration.GetConnectionString("DB1Connection");
+var DB2Connection = builder.Configuration.GetConnectionString("DB2Connection");
+builder.Services.AddDbContext<Db_Rebel_WingsContext>(options => options.UseSqlServer(RebelWingsConnection))
+    .AddDbContext<BDFORTIAContext>(options => options.UseSqlServer(FortiaConnection))
+    .AddDbContext<BD1Context>(options => options.UseSqlServer(DB1Connection))
+    .AddDbContext<BD2Context>(options => options.UseSqlServer(DB2Connection));
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailConfigurations"));
 
 builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
