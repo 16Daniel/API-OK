@@ -41,3 +41,4 @@ bin/
 
 # JetBrains Rider
 *.sln.iml
+/api.rebel-wings/appsettings.Development.json
