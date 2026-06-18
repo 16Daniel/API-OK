@@ -99,7 +99,7 @@ namespace dal.bd2.Repository.Stock
             List<int> codigos = new List<int>();
             List<biz.bd2.Models.ArtInvSem> articulosbd = new List<biz.bd2.Models.ArtInvSem>();
 
-            var connectionString = _configuration.GetConnectionString("DBP");
+            var connectionString = _configuration.GetConnectionString("DBPConnection");
             using (SqlConnection conexion = new SqlConnection(connectionString))
             {
                 using (SqlCommand comando = new SqlCommand("GET_ARTICULOS_INV_SEMANAL", conexion))
@@ -287,7 +287,7 @@ namespace dal.bd2.Repository.Stock
             List<int> codigos = new List<int>();
             List<biz.bd2.Models.ArtInvSem> articulosbd = new List<biz.bd2.Models.ArtInvSem>();
 
-            var connectionString = _configuration.GetConnectionString("DBP");
+            var connectionString = _configuration.GetConnectionString("DBPConnection");
             using (SqlConnection conexion = new SqlConnection(connectionString))
             {
                 using (SqlCommand comando = new SqlCommand("GET_ARTICULOS_INV_SEMANAL", conexion))
