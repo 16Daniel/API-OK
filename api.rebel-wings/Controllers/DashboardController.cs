@@ -22,6 +22,7 @@ using System.Linq;
 using biz.bd2.Models;
 using dal.rebel_wings.DBContext;
 using dal.bd2.DBContext;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.rebel_wings.Controllers;
 /// <summary>
@@ -1000,13 +1001,34 @@ public class DashboardController : ControllerBase
         }
         return StatusCode(201, response);
     }
+
     [HttpGet]
     [Route("validarConexion")]
-    public async Task<ActionResult> validarConexion()
+    public async Task<IActionResult> ValidarConexion()
     {
-        var data1 = _dbContext.IT_25PTs.FirstOrDefault(); 
-        var data2 = _bd2Context.Albcompracabs.FirstOrDefault();
-        return StatusCode(StatusCodes.Status200OK, new { data1 = data1, data2 = data2 });
+        try
+        {
+            //// 1. Probar primera base de datos
+            //var data1 = await _dbContext.IT_25PTs
+            //    .AsNoTracking()
+            //    .FirstOrDefaultAsync();
+
+            //// 2. Probar segunda base de datos
+            //var data2 = await _bd2Context.Articuloscamposlibres
+            //    .AsNoTracking()
+            //    .FirstOrDefaultAsync();
+            return Ok("El servidor IIS responde correctamente");
+            //return StatusCode(StatusCodes.Status200OK, new { data1 = data1, data2 = data2 });
+        }
+        catch (Exception ex)
+        {
+            // Retorna el error exacto en lugar de quedarse colgado
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
+        }
     }
 
 }
