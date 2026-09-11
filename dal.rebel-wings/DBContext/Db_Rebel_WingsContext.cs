@@ -123,7 +123,10 @@ namespace dal.rebel_wings.DBContext
         public virtual DbSet<WaitlistTable> WaitlistTables { get; set; }
         public virtual DbSet<WashBasinWithSoapPaper> WashBasinWithSoapPapers { get; set; }
         public virtual DbSet<_25pts> IT_25PTs { get; set; }
+        public virtual DbSet<_MermaSuc> IT_MERMASs { get; set; }
         public virtual DbSet<Tiempos> IT_TIEMPOs { get; set; }
+        public virtual DbSet<InventarioMensual> InventariosMensuales { get; set; }
+        public virtual DbSet<InventarioMensualRegistro> InventariosRegistrosMensuales { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -289,6 +292,76 @@ namespace dal.rebel_wings.DBContext
 
             });
 
+            modelBuilder.Entity<InventarioMensual>(entity =>
+            {
+
+                entity.ToTable("Inventario_Mensual");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.Registro).HasColumnName("registro");
+                entity.Property(e => e.City).HasColumnName("city");
+                entity.Property(e => e.Sucursal).HasColumnName("sucursal");
+                entity.Property(e => e.Codarticulo).HasColumnName("codarticulo");
+                entity.Property(e => e.Referencia)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("referencia");
+                entity.Property(e => e.Descripcion)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("descripcion");
+                entity.Property(e => e.Medida)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("medida");
+                entity.Property(e => e.Unidades)
+                    .HasColumnType("numeric(18, 2)")
+                    .HasColumnName("unidades");
+                entity.Property(e => e.StockAnterior)
+                    .HasColumnType("numeric(18, 2)")
+                    .HasColumnName("stock_ant");
+                entity.Property(e => e.Diferencia)
+                    .HasColumnType("numeric(18, 2)")
+                    .HasColumnName("diferencia");
+                entity.Property(e => e.Valor)
+                    .HasColumnType("numeric(18, 2)")
+                    .HasColumnName("valor");
+                entity.Property(e => e.Precio)
+                    .HasColumnType("numeric(18, 2)")
+                    .HasColumnName("precio");
+                entity.Property(e => e.Date)
+                    .HasColumnType("datetime")
+                    .HasColumnName("date");
+                entity.Property(e => e.Procesado).HasColumnName("procesado");
+                entity.Property(e => e.orden).HasColumnName("orden");
+                entity.Property(e => e.tipo)
+                   .IsRequired()
+                   .HasMaxLength(50)
+                   .IsUnicode(false)
+                   .HasColumnName("tipo");
+
+            });
+            modelBuilder.Entity<InventarioMensualRegistro>(entity =>
+            {
+
+                entity.ToTable("Inventario_Mensual_Registro");
+                entity.Property(e => e.Id).HasColumnName("id");
+                entity.Property(e => e.City).HasColumnName("city");
+                entity.Property(e => e.Sucursal).HasColumnName("sucursal");
+                entity.Property(e => e.Captura)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("captura");
+                entity.Property(e => e.DateCaptura)
+                    .HasColumnType("datetime")
+                    .HasColumnName("dateCaptura");
+                entity.Property(e => e.Procesado).HasColumnName("procesado");
+
+            });
+
             modelBuilder.Entity<_25pts>(entity =>
             {
                 
@@ -304,11 +377,64 @@ namespace dal.rebel_wings.DBContext
                 entity.Property(e => e.Cobros).HasColumnName("COBROS");
                 entity.Property(e => e.CobrosMinimos).HasColumnName("COBROS_MINIMOS");
                 entity.Property(e => e.Diferencia).HasColumnName("DIFERENCIA");
+                entity.Property(e => e.Vendedor).HasColumnName("VENDEDOR");
+                entity.Property(e => e.Codvendedor).HasColumnName("CODVENDEDOR");
                 entity.Property(e => e.Justificacion)
                     .IsRequired()
                     .HasMaxLength(800)
                     .IsUnicode(false)
                     .HasColumnName("JUSTIFICACION");
+                entity.Property(e => e.Usuario)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("USUARIO");
+                entity.Property(e => e.Sucursal)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("SUCURSAL");
+
+            });
+
+            modelBuilder.Entity<_MermaSuc>(entity =>
+            {
+
+                entity.ToTable("IT_MERMAS");
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Fecha)
+                    .HasColumnType("datetime")
+                    .HasColumnName("FECHA");
+                entity.Property(e => e.Serie)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .IsUnicode(false)
+                    .HasColumnName("SERIE");
+                entity.Property(e => e.Numero).HasColumnName("NUMERO");
+                entity.Property(e => e.Codarticulo).HasColumnName("CODARTICULO");
+                entity.Property(e => e.Referencia)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .IsUnicode(false)
+                    .HasColumnName("REFERENCIA");
+                entity.Property(e => e.Descripcion)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .IsUnicode(false)
+                    .HasColumnName("DESCRIPCION");
+                entity.Property(e => e.unidades).HasColumnName("UNIDADES");
+                entity.Property(e => e.precio).HasColumnName("PRECIO");
+                entity.Property(e => e.Justificacion)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .IsUnicode(false)
+                    .HasColumnName("JUSTIFICACION");
+                entity.Property(e => e.Comentarios)
+                    .IsRequired()
+                    .HasMaxLength(800)
+                    .IsUnicode(false)
+                    .HasColumnName("COMENTARIOS");
                 entity.Property(e => e.Usuario)
                     .IsRequired()
                     .HasMaxLength(100)

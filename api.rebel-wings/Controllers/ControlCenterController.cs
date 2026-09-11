@@ -306,6 +306,7 @@ namespace api.rebel_wings.Controllers
                 var inicio = today.AbsoluteStart();
                 var startDay = inicio.AddHours(7);
                 var middleDay = inicio.AddHours(17);     //----> correcta
+                var invDayend = inicio.AddHours(11);
                 var diant = middleDay.AddDays(-1);
                 var endDay = inicio.AddHours(27);
                 //var middleDay = today.AbsoluteEnd();
@@ -568,7 +569,22 @@ namespace api.rebel_wings.Controllers
                     });
                     
                     break;
-                  }
+                    case 4:
+                            
+                    data1.ControlCenters.Add(new ControlCenter()
+                    {
+                        Name = "INVENTARIO MENSUAL",
+                        Description = "",
+                        IsPercentageOrComplete = false,
+                        IsComplete = false,
+                        Percentage = 0,
+                        Color = _salesExpectationRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= inicio && e.CreatedDate <= invDayend && e.CreatedBy == idUser)
+                        ? "success" : "warning"
+                    });
+
+                    break;
+                    }
+
                 }
                 else if (workshift == 2)
                 {
@@ -787,7 +803,21 @@ namespace api.rebel_wings.Controllers
                         Id = _riskProductRepository.GetAll().FirstOrDefault(e => e.BranchId == branch && e.CreatedDate >= startDay && e.CreatedDate <= endDay && e.CreatedBy == idUser)?.Id
                     });
                     break;
-                  }
+                    case 4:
+
+                        data1.ControlCenters.Add(new ControlCenter()
+                        {
+                            Name = "INVENTARIO MENSUAL",
+                            Description = "",
+                            IsPercentageOrComplete = false,
+                            IsComplete = false,
+                            Percentage = 0,
+                            Color = _salesExpectationRepository.GetAll().Any(e => e.Branch == branch && e.CreatedDate >= inicio && e.CreatedDate <= invDayend && e.CreatedBy == idUser)
+                            ? "success" : "warning"
+                        });
+
+                    break;
+                    }
                 }
                 
                 //var res = _mapper.Map<StockChickenDto>(_salesExpectationRepository.Find(f => f.Id == id));

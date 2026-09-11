@@ -17,6 +17,8 @@ namespace dal.bd2.DBContext
         {
         }
 
+        
+
         public virtual DbSet<Accionespromocion> Accionespromocions { get; set; }
         public virtual DbSet<Accionespromocionlin> Accionespromocionlins { get; set; }
         public virtual DbSet<Actividade> Actividades { get; set; }
@@ -1167,6 +1169,7 @@ namespace dal.bd2.DBContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
             modelBuilder.Entity<Accionespromocion>(entity =>
             {
                 entity.HasKey(e => new { e.Idpromocion, e.Idaccion })
@@ -5286,6 +5289,15 @@ namespace dal.bd2.DBContext
                 .HasColumnName("REGULARIZA_SEMANAL")
                 .HasMaxLength(1)
                 .IsFixedLength();
+
+                entity.Property(e => e.InventarioMensual)
+                .HasColumnName("INV_MENSUAL")
+                .HasMaxLength(1)
+                .IsFixedLength();
+
+                entity.Property(e => e.Orden)
+                .HasColumnName("ORDEN_INVENTARIO_APP");
+
 
                 entity.HasOne(d => d.CodarticuloNavigation)
                     .WithOne(p => p.Articuloscamposlibre)

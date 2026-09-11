@@ -6,10 +6,12 @@ public class Mermas
     public double Unity { get; set; }
     public double Price { get; set; }
     public string UnitMeasure { get; set; }
+    public DateTime Fecha { get; set; }
 }
 public class Reporte
 {
     public string cod { get; set; }
+    public string Region { get; set; }
     public string Sucursal { get; set; }
     public string Articulo { get; set; }
     public string InvAyer { get; set; }
@@ -20,7 +22,44 @@ public class Reporte
     public double Diferencia { get; set; }
     public DateTime Captura { get; set; }
     public string Seccion { get; set; }
+    public double? Mermasayer { get; set; }
 
+}
+
+public class Apps
+{
+    public string Reg { get; set; }
+    public string Cod { get; set; }
+    public string Sucursal { get; set; }
+    public int Codcliente { get; set; }
+    public string App{ get; set; }
+    public double Total { get; set; }
+    public string Mes { get; set; }
+    public string Marca { get; set; }
+    public string Nom { get; set; }
+}
+
+public class SucursalesFront
+{
+    public string Idfront { get; set; }
+    public string Titulo { get; set; }
+}
+
+public class Ranking
+{
+    public int Cod { get; set; }
+    public string Descripcion { get; set; }
+    public string Seccion { get; set; }
+    public double Unidades { get; set; }
+    public double Importe { get; set; }
+    public double Porcentaje { get; set; }
+
+}
+
+public class Checadas { 
+    public DateTime Fecha { get; set; }
+    public string Reloj { get; set; }
+    public string Empleado { get; set; }
 }
 
 public class Vendedor
