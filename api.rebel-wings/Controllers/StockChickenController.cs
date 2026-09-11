@@ -92,7 +92,7 @@ namespace api.rebel_wings.Controllers
             _inventarioMensualRegistroRepository = inventarioMensualRegistroRepository;
             _inventarioMensualRepository = inventarioMensualRepository;
             _configuration = configuration;
-            defaultconnectionString = _configuration.GetConnectionString("DefaultConnection");
+            defaultconnectionString = _configuration.GetConnectionString("RebelWingsConnection");
 
         }
         /// <summary>
