@@ -150,29 +150,31 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
             builder =>
             {
                 builder
+                .AllowAnyOrigin()
                 .AllowAnyMethod()
-                .AllowAnyHeader()
-                .WithOrigins("http://localhost")
-                .WithOrigins("http://localhost:4200")
-                .WithOrigins("https://localhost:4200/")
-                .WithOrigins("http://localhost:8100")
-                .WithOrigins("http://demo-minimalist.com")
-                .WithOrigins("http://34.237.214.147")
-                .WithOrigins("https://my.premierds.com/")
-                .WithOrigins("Ionic://localhost")
-                .WithOrigins("capacitor://localhost")
-                .WithOrigins("http://localhost:63410")
-                .WithOrigins("https://localhost:49403")
-                .AllowCredentials();
+                .AllowAnyHeader();
+                //.WithOrigins("http://localhost")
+                //.WithOrigins("http://localhost:4200")
+                //.WithOrigins("https://localhost:4200/")
+                //.WithOrigins("http://localhost:8100")
+                //.WithOrigins("https://operamx.no-ip.net")
+                //.WithOrigins("http://operamx.no-ip.net")
+                //.WithOrigins("http://10.128.0.2")
+                //.WithOrigins("https://my.premierds.com/")
+                //.WithOrigins("Ionic://localhost")
+                //.WithOrigins("capacitor://localhost")
+                //.WithOrigins("http://localhost:63410")
+                //.WithOrigins("https://localhost:49403")
+                //.AllowCredentials();
             }));
 
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
-builder.Services.AddHostedService<JobReporteMensualTemp>();
-builder.Services.AddHostedService<JobUltimaActualizacion>();
-builder.Services.AddHostedService<JobNotificacionInventario>();
-builder.Services.AddHostedService<JobNotificacionInventarioV>();
+//builder.Services.AddHostedService<JobReporteMensualTemp>();
+//builder.Services.AddHostedService<JobUltimaActualizacion>();
+//builder.Services.AddHostedService<JobNotificacionInventario>();
+//builder.Services.AddHostedService<JobNotificacionInventarioV>();
 #region REPOSITORIES
 builder.Services.AddTransient<ITiemposRepository, TiemposRepository>();
 builder.Services.AddTransient<I25ptsRepository, _25ptsRepository>();
@@ -365,14 +367,25 @@ var app = builder.Build();
 //    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "api.rebel_wings v1"));
 //}
 app.UseCors("CorsPolicy");
+//app.UseSwaggerUI(c =>
+//{
+//    app.UseSwagger().UseDeveloperExceptionPage();
+//#if DEBUG
+//    c.SwaggerEndpoint("/swagger/v1/swagger.json", "api.rebel_wings v1");
+//#else
+//    c.SwaggerEndpoint("/back/api_rebel_wings/swagger/v1/swagger.json", "api.rebel_wings v1");
+//#endif
+//});
+
+// 1. Generar el JSON (Debe ir suelto)
+app.UseSwagger();
+app.UseDeveloperExceptionPage();
+
+// 2. Configurar la interfaz gráfica
 app.UseSwaggerUI(c =>
 {
-    app.UseSwagger().UseDeveloperExceptionPage();
-#if DEBUG
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "api.rebel_wings v1");
-#else
-    c.SwaggerEndpoint("/back/api_rebel_wings/swagger/v1/swagger.json", "api.rebel_wings v1");
-#endif
+    // Al usar una ruta relativa (../ o v1/), el navegador se adapta automáticamente a IIS o Localhost
+    c.SwaggerEndpoint("../swagger/v1/swagger.json", "api.rebel_wings v1");
 });
 
 app.UseHttpsRedirection();

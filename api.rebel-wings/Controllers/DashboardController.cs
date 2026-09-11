@@ -1008,17 +1008,17 @@ public class DashboardController : ControllerBase
     {
         try
         {
-            //// 1. Probar primera base de datos
-            //var data1 = await _dbContext.IT_25PTs
-            //    .AsNoTracking()
-            //    .FirstOrDefaultAsync();
+            // 1. Probar primera base de datos
+            var data1 = await _dbContext.IT_25PTs
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
-            //// 2. Probar segunda base de datos
-            //var data2 = await _bd2Context.Articuloscamposlibres
-            //    .AsNoTracking()
-            //    .FirstOrDefaultAsync();
-            return Ok("El servidor IIS responde correctamente");
-            //return StatusCode(StatusCodes.Status200OK, new { data1 = data1, data2 = data2 });
+            // 2. Probar segunda base de datos
+            var data2 = await _bd2Context.Articuloscamposlibres
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+            //return Ok("El servidor IIS responde correctamente");
+            return StatusCode(StatusCodes.Status200OK, new { data1 = data1, data2 = data2 });
         }
         catch (Exception ex)
         {
@@ -1029,6 +1029,14 @@ public class DashboardController : ControllerBase
                 innerError = ex.InnerException?.Message
             });
         }
+    }
+
+    [HttpGet("test-variable")]
+    public IActionResult TestVariable()
+    {
+        // Pon el nombre exacto de tu variable de entorno aquí
+        var valor = Environment.GetEnvironmentVariable("RebelWingsConnection");
+        return Ok(new { valor_recibido = valor ?? "LA VARIABLE ESTA NULA" });
     }
 
 }

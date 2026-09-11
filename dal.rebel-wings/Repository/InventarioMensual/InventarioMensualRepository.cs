@@ -301,7 +301,7 @@ public class InventarioMensualRepository : GenericRepository<biz.rebel_wings.Ent
         string date = DateTime.UtcNow.ToString("dd-MM-yyyy");
         // Configurar la información de la cuenta de Gmail
         string correoRemitente = "gilberto.r@operamx.com";
-        string contraseña = "sjlh rtya uehm pjmk";
+        string contraseña = "yfwv wiqd feby bwtj";
 
         // Configurar la información del destinatario
         // string correoDestinatario = "developeramh@outlook.com";
