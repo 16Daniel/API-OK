@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
+using System.Text.Json;
 
 namespace dal.bd2.Repository.Stock
 {
@@ -21,8 +22,26 @@ namespace dal.bd2.Repository.Stock
         {
             _configuration = configuration;
         }
-        public List<biz.bd2.Models.StockDto> GetStock(int id_sucursal)
+        public async Task<List<biz.bd2.Models.StockDto>> GetStock(int id_sucursal)
         {
+            var connectionString = _configuration.GetConnectionString("DBPConnection");
+            using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync();
+            var result = new ParametrosConfigDto(); 
+
+            var query = "SELECT ConfiguracionJson FROM ParametrosConfiguracionDiarioASem WHERE NombreClave = 'CONFIG_GENERAL'";
+            using var cmd = new SqlCommand(query, conn);
+
+            var jsonResult = await cmd.ExecuteScalarAsync() as string;
+
+            if (!string.IsNullOrEmpty(jsonResult))
+            {
+                result = JsonSerializer.Deserialize<ParametrosConfigDto>(jsonResult, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+
             List<biz.bd2.Models.StockDto> _stock = new List<biz.bd2.Models.StockDto>();
             List<biz.bd2.Models.StockDto> _stock2 = new List<biz.bd2.Models.StockDto>();
             var timeNow = DateTime.Now;
@@ -61,7 +80,16 @@ namespace dal.bd2.Repository.Stock
                     .Where(s => s.Codalmacen == serie && s.RegularizaSemanal == "T").ToList();
 
             }
-                if (timeNow.Hour < 3) {
+
+            if (result != null)
+            {
+                if (result.SucursalIds.Contains(id_sucursal))
+                {
+                   _stock = _stock.Where(x => !result.ArticuloIds.Contains(x.Codarticulo)).ToList(); 
+                }
+            }
+
+            if (timeNow.Hour < 3) {
 
                     _stock = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha == DateTime.Now.Date.AddDays(-1) && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Hora.Value.Hour > 3 && es.Tipo == "REG").Any()).ToList();
                     _stock2 = _stock.Where(s => !_context.Moviments.Where(es => es.Fecha == DateTime.Now.Date && es.Codarticulo == s.Codarticulo && es.Codalmacenorigen == s.Codalmacen && es.Codalmacendestino == "" && es.Tipo == "REG").Any()).ToList();
@@ -93,13 +121,13 @@ namespace dal.bd2.Repository.Stock
              
         }
 
-        public List<biz.bd2.Models.StockDto> GetStockArtSemMat(int id_sucursal)
-        {   
-
+        public async Task<List<StockDto>> GetStockArtSemMat(int id_sucursal)
+        {
             List<int> codigos = new List<int>();
             List<biz.bd2.Models.ArtInvSem> articulosbd = new List<biz.bd2.Models.ArtInvSem>();
 
             var connectionString = _configuration.GetConnectionString("DBPConnection");
+
             using (SqlConnection conexion = new SqlConnection(connectionString))
             {
                 using (SqlCommand comando = new SqlCommand("GET_ARTICULOS_INV_SEMANAL", conexion))
@@ -120,6 +148,33 @@ namespace dal.bd2.Repository.Stock
                             }
                             codigos.Add(codigo); 
                             articulosbd.Add(new biz.bd2.Models.ArtInvSem() { codarticulo = codigo, prioridad = orden} );
+                        }
+                    }
+                }
+            }
+
+            using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync();
+
+            var query = "SELECT ConfiguracionJson FROM ParametrosConfiguracionDiarioASem WHERE NombreClave = 'CONFIG_GENERAL'";
+            using var cmd = new SqlCommand(query, conn);
+
+            var jsonResult = await cmd.ExecuteScalarAsync() as string;
+
+            if (!string.IsNullOrEmpty(jsonResult))
+            {
+                var result = JsonSerializer.Deserialize<ParametrosConfigDto>(jsonResult, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if(result != null) 
+                {
+                    if (result.SucursalIds.Contains(id_sucursal)) 
+                    {
+                        foreach(int cod in  result.ArticuloIds) 
+                        {
+                            codigos.Add(cod); 
                         }
                     }
                 }
@@ -165,7 +220,7 @@ namespace dal.bd2.Repository.Stock
 
                 foreach(var item in _stock) 
                 {
-                    item.Orden = articulosbd.Where(x => x.codarticulo == item.Codarticulo).FirstOrDefault().prioridad; 
+                    item.Orden = articulosbd.Where(x => x.codarticulo == item.Codarticulo).FirstOrDefault()?.prioridad ?? 0;
                 }
 
             }
@@ -217,12 +272,30 @@ namespace dal.bd2.Repository.Stock
             else { return null; }
         }
 
-        public List<biz.bd2.Models.StockDto> GetStockV(int id_sucursal)
+        public async Task<List<biz.bd2.Models.StockDto>> GetStockV(int id_sucursal)
         {
             List<biz.bd2.Models.StockDto> _stock = new List<biz.bd2.Models.StockDto>();
             List<biz.bd2.Models.StockDto> _stock2 = new List<biz.bd2.Models.StockDto>();
             var Hrs = DateTime.Now.Hour;
             var ampm = Hrs >= 12 ? "PM" : "AM";
+
+            var connectionString = _configuration.GetConnectionString("DBPConnection");
+            using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync();
+            var result = new ParametrosConfigDto();
+
+            var query = "SELECT ConfiguracionJson FROM ParametrosConfiguracionDiarioASem WHERE NombreClave = 'CONFIG_GENERAL'";
+            using var cmd = new SqlCommand(query, conn);
+
+            var jsonResult = await cmd.ExecuteScalarAsync() as string;
+
+            if (!string.IsNullOrEmpty(jsonResult))
+            {
+                result = JsonSerializer.Deserialize<ParametrosConfigDto>(jsonResult, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
 
             var serie = _context.RemCajasfronts.FirstOrDefault(x => x.Idfront == id_sucursal).Codalmventas;
             if (serie != null)
@@ -259,6 +332,15 @@ namespace dal.bd2.Repository.Stock
                     .Where(s => s.Codalmacen == serie && s.RegularizaSemanal == "T").ToList();
 
             }
+
+            if (result != null)
+            {
+                if (result.SucursalIds.Contains(id_sucursal))
+                {
+                    _stock = _stock.Where(x => !result.ArticuloIds.Contains(x.Codarticulo)).ToList();
+                }
+            }
+
             if (ampm.ToString().Equals("AM"))
             {
 
@@ -281,7 +363,7 @@ namespace dal.bd2.Repository.Stock
 
         }
 
-        public List<biz.bd2.Models.StockDto> GetStockartSem(int id_sucursal)
+        public async Task<List<StockDto>> GetStockartSem(int id_sucursal)
         {  
             DateTime timeNow = DateTime.Now.Date;
             List<int> codigos = new List<int>();
@@ -308,6 +390,33 @@ namespace dal.bd2.Repository.Stock
                             }
                             codigos.Add(codigo);
                             articulosbd.Add(new biz.bd2.Models.ArtInvSem() { codarticulo = codigo, prioridad = orden });
+                        }
+                    }
+                }
+            }
+
+            using var conn = new SqlConnection(connectionString);
+            await conn.OpenAsync();
+
+            var query = "SELECT ConfiguracionJson FROM ParametrosConfiguracionDiarioASem WHERE NombreClave = 'CONFIG_GENERAL'";
+            using var cmd = new SqlCommand(query, conn);
+
+            var jsonResult = await cmd.ExecuteScalarAsync() as string;
+
+            if (!string.IsNullOrEmpty(jsonResult))
+            {
+                var result = JsonSerializer.Deserialize<ParametrosConfigDto>(jsonResult, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (result != null)
+                {
+                    if (result.SucursalIds.Contains(id_sucursal))
+                    {
+                        foreach (int cod in result.ArticuloIds)
+                        {
+                            codigos.Add(cod);
                         }
                     }
                 }
@@ -354,7 +463,7 @@ namespace dal.bd2.Repository.Stock
 
                 foreach (var item in _stock)
                 {
-                    item.Orden = articulosbd.Where(x => x.codarticulo == item.Codarticulo).FirstOrDefault().prioridad;
+                    item.Orden = articulosbd.Where(x => x.codarticulo == item.Codarticulo).FirstOrDefault()?.prioridad ?? 0;
                 }
 
             }
@@ -1797,4 +1906,11 @@ namespace dal.bd2.Repository.Stock
         }
 
     }
+
+    public class ParametrosConfigDto
+    {
+        public List<int> SucursalIds { get; set; } = new();
+        public List<int> ArticuloIds { get; set; } = new();
+    }
+
 }

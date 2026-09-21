@@ -168,7 +168,7 @@ namespace api.rebel_wings.Controllers
         /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
         /// <returns></returns>
         [HttpGet("GetStock", Name = "GetStock")]
-        public ActionResult<ApiResponse<List<StockDto>>> GetStock(int id_sucursal, string dataBase)
+        public async Task<ActionResult<ApiResponse<List<StockDto>>>> GetStock(int id_sucursal, string dataBase)
         {
             var response = new ApiResponse<List<StockDto>>();
 
@@ -181,7 +181,7 @@ namespace api.rebel_wings.Controllers
                         response.Message = "success";
                         break;
                     case "DB2":
-                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStock(id_sucursal));
+                        response.Result = _mapper.Map<List<StockDto>>(await _stockDB2Repository.GetStock(id_sucursal));
                         response.Message = "success";
                         break;
                     default:
@@ -202,13 +202,13 @@ namespace api.rebel_wings.Controllers
         }
 
         [HttpGet("GetStockArtSemMat", Name = "GetStockArtSemMat")]
-        public ActionResult<ApiResponse<List<StockDto>>> GetStockArtSemMat(int id_sucursal, string dataBase)
+        public async Task<ActionResult<ApiResponse<List<StockDto>>>> GetStockArtSemMat(int id_sucursal, string dataBase)
         {
             var response = new ApiResponse<List<StockDto>>();
             dataBase = "DB2"; 
             try
             {
-                response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockArtSemMat(id_sucursal));
+                response.Result = _mapper.Map<List<StockDto>>(await _stockDB2Repository.GetStockArtSemMat(id_sucursal));
                 response.Message = "success";
             }
             catch (Exception ex)
@@ -229,7 +229,7 @@ namespace api.rebel_wings.Controllers
         /// <param name="dataBase">dataBase base de datos que se obtiene de login</param>
         /// <returns></returns>
         [HttpGet("GetStockV", Name = "GetStockV")]
-        public ActionResult<ApiResponse<List<StockDto>>> GetStockV(int id_sucursal, string dataBase)
+        public async Task<ActionResult<ApiResponse<List<StockDto>>>> GetStockV(int id_sucursal, string dataBase)
         {
             dataBase = "DB2";
             var response = new ApiResponse<List<StockDto>>();
@@ -243,7 +243,7 @@ namespace api.rebel_wings.Controllers
                         response.Message = "success";
                         break;
                     case "DB2":
-                        response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockV(id_sucursal));
+                        response.Result = _mapper.Map<List<StockDto>>(await _stockDB2Repository.GetStockV(id_sucursal));
                         response.Message = "success";
                         break;
                     default:
@@ -264,14 +264,14 @@ namespace api.rebel_wings.Controllers
         }
 
         [HttpGet("GetStockArtSemV", Name = "GetStockArtSemV")]
-        public ActionResult<ApiResponse<List<StockDto>>> GetStockArtSemV(int id_sucursal, string dataBase)
+        public async Task<ActionResult<ApiResponse<List<StockDto>>>> GetStockArtSemV(int id_sucursal, string dataBase)
         {
             dataBase = "DB2";
             var response = new ApiResponse<List<StockDto>>();
 
             try
             {
-                response.Result = _mapper.Map<List<StockDto>>(_stockDB2Repository.GetStockartSem(id_sucursal));
+                response.Result = _mapper.Map<List<StockDto>>(await _stockDB2Repository.GetStockartSem(id_sucursal));
                 response.Message = "success";
             }
             catch (Exception ex)
