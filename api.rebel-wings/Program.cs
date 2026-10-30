@@ -171,8 +171,8 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<ILoggerManager, LoggerManager>();
 builder.Services.AddScoped<ValidationFilterAttribute>();
-//builder.Services.AddHostedService<JobReporteMensualTemp>();
-//builder.Services.AddHostedService<JobUltimaActualizacion>();
+builder.Services.AddHostedService<JobReporteMensualTemp>();
+builder.Services.AddHostedService<JobUltimaActualizacion>();
 //builder.Services.AddHostedService<JobNotificacionInventario>();
 //builder.Services.AddHostedService<JobNotificacionInventarioV>();
 #region REPOSITORIES
