@@ -211,7 +211,7 @@ namespace api.rebel_wings.Jobs
         {
             // Configurar la información de la cuenta de Gmail
             string correoRemitente = "gilberto.r@operamx.com";
-            string contraseña = "pbbh okpj kduv okxl"; 
+            string contraseña = "aupy zagf stvz ucmu"; 
 
             // Configurar la información del destinatario
            // string correoDestinatario = "developeramh@outlook.com";
